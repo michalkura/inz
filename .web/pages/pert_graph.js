@@ -15,9 +15,38 @@ import NextHead from "next/head"
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 
-export function Box_5b6ddbb9bb444b64f404994083139292 () {
+export function Box_b5728a802ab8729598fa1d4cdebf8f0c () {
   
-    const handleSubmit_5c94cfaa7e27b9ea0ec5157ab0628191 = useCallback((ev) => {
+    const handleSubmit_ae134e95a4b9e1c7bf6cdb8553a5bc77 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.pert_site.add_node_field", {new_nodes:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+  const [addEvents, connectError] = useContext(EventLoopContext);
+
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_ae134e95a4b9e1c7bf6cdb8553a5bc77}>
+  <HStack>
+  <Input name={`new_field`} placeholder={`Add node name`} type={`text`}/>
+  <Button type={`submit`}>
+  {`+`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Box_5a2da317080959302d058aa7b03872fc () {
+  
+    const handleSubmit_641721b81a2ddeccc241e90ac39442ce = useCallback((ev) => {
         const $form = ev.target
         ev.preventDefault()
         const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
@@ -33,142 +62,11 @@ export function Box_5b6ddbb9bb444b64f404994083139292 () {
 
 
   return (
-    <Box as={`form`} onSubmit={handleSubmit_5c94cfaa7e27b9ea0ec5157ab0628191}>
+    <Box as={`form`} onSubmit={handleSubmit_641721b81a2ddeccc241e90ac39442ce}>
   <HStack>
-  <Select_ea4d06f5ff39f94640f82b0aeccf21ae/>
+  <Select_adc49b90582f73b2ef6a8c9578aa8c8f/>
   <Button type={`submit`}>
   {`Delete node`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Box_b32636e2868f591e4e6348c61603da6e () {
-  const [addEvents, connectError] = useContext(EventLoopContext);
-  
-    const handleSubmit_da4dc6d8e5ac4117c7cc4b7ab7481417 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.pert_site.handle_nodes_submit", {nodes:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_da4dc6d8e5ac4117c7cc4b7ab7481417}>
-  <Vstack_ffa9eeb46d538d67a238a02fc887096a/>
-</Box>
-  )
-}
-
-export function Textarea_886feac8bd743d12719266e53c842f56 () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <Textarea isReadOnly={true} value={state__pert_site.cpm_json}/>
-  )
-}
-
-export function Box_620107cbc750cbc3bd284668b16c3a30 () {
-  const [addEvents, connectError] = useContext(EventLoopContext);
-  
-    const handleSubmit_69f030e700f570bc34ec8f993bd1f471 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.pert_site.handle_edge_deletion", {edge:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_69f030e700f570bc34ec8f993bd1f471}>
-  <HStack>
-  <Select_c9ba930e76895aa76e3475062f30711d/>
-  <Button type={`submit`}>
-  {`Delete edge`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Select_c9ba930e76895aa76e3475062f30711d () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <Select name={`edge_del`} placeholder={`Select edge to delete.`} size={`xs`}>
-  {state__pert_site.edges_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Select_515dc1e66b71177f23bcbb7303c087ac () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <Select name={`successor`} placeholder={`Select successor node.`} size={`xs`}>
-  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Grid_908cbcd01e197c24159fab70cd5671e5 () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <DataTableGrid columns={state__pert_site.cpm_dataframe.columns} data={state__pert_site.cpm_dataframe.data} pagination={true} search={true}/>
-  )
-}
-
-export function Box_b0b0c22cbc7a19734d06f8b39728d813 () {
-  const [addEvents, connectError] = useContext(EventLoopContext);
-  
-    const handleSubmit_e7f535891c33677367ded0322eba0b23 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.pert_site.handle_edges_submit", {new_edges:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_e7f535891c33677367ded0322eba0b23}>
-  <HStack>
-  <Select_64ebab49ff0c29c11d8aa3d43b8090fe/>
-  <Select_515dc1e66b71177f23bcbb7303c087ac/>
-  <Button type={`submit`}>
-  {`Add edge`}
 </Button>
 </HStack>
 </Box>
@@ -187,35 +85,6 @@ export function Button_1889fcb4148afdaf100de7d9f1a051ae () {
   )
 }
 
-export function Box_d2611b7d2862c3ae6d80ec409ae5acca () {
-  
-    const handleSubmit_900ef092476ebacf40dbf7ce43cc3fdb = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.pert_site.add_node_field", {new_nodes:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_900ef092476ebacf40dbf7ce43cc3fdb}>
-  <HStack>
-  <Input name={`new_field`} placeholder={`Add node name`} type={`text`}/>
-  <Button type={`submit`}>
-  {`+`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
 export function Editable_de2c96ca8479da966a0de72009ce0d84 () {
   const [addEvents, connectError] = useContext(EventLoopContext);
 
@@ -229,7 +98,147 @@ export function Editable_de2c96ca8479da966a0de72009ce0d84 () {
   )
 }
 
-export function Vstack_ffa9eeb46d538d67a238a02fc887096a () {
+export function Plot_e15c860e2b9245a632aaf379db84a2bb () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Plot data={state__pert_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
+  )
+}
+
+export function Select_43e029aa74fdf11aa64884ce31d6a1f4 () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Select name={`successor`} placeholder={`Select successor node.`} size={`xs`}>
+  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Select_adc49b90582f73b2ef6a8c9578aa8c8f () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
+  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Box_36238ec8569869e1a7a58f25616d068d () {
+  
+    const handleSubmit_cde3a54b83fc4c0eac30df7f5988b3ca = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.pert_site.handle_nodes_submit", {nodes:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+  const [addEvents, connectError] = useContext(EventLoopContext);
+
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_cde3a54b83fc4c0eac30df7f5988b3ca}>
+  <Vstack_8227b6c7b7b4feaefe4b2ce92aa8897a/>
+</Box>
+  )
+}
+
+export function Select_9d5a8a0179f69da155d15e63f0bb0758 () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Select name={`edge_del`} placeholder={`Select edge to delete.`} size={`xs`}>
+  {state__pert_site.edges_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Box_33a215e7afbde1e270e7975c75bc221c () {
+  
+    const handleSubmit_fdd811fbe9e4fd45b2178ef5634568ad = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.pert_site.handle_edge_deletion", {edge:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+  const [addEvents, connectError] = useContext(EventLoopContext);
+
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_fdd811fbe9e4fd45b2178ef5634568ad}>
+  <HStack>
+  <Select_9d5a8a0179f69da155d15e63f0bb0758/>
+  <Button type={`submit`}>
+  {`Delete edge`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Grid_908cbcd01e197c24159fab70cd5671e5 () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <DataTableGrid columns={state__pert_site.cpm_dataframe.columns} data={state__pert_site.cpm_dataframe.data} pagination={true} search={true}/>
+  )
+}
+
+export function Select_dde139c54fa256b2c2aac66b80016077 () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
+  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Textarea_886feac8bd743d12719266e53c842f56 () {
+  const state__pert_site = useContext(StateContexts.state__pert_site)
+
+
+  return (
+    <Textarea isReadOnly={true} value={state__pert_site.cpm_json}/>
+  )
+}
+
+export function Vstack_8227b6c7b7b4feaefe4b2ce92aa8897a () {
   const state__pert_site = useContext(StateContexts.state__pert_site)
 
 
@@ -249,42 +258,33 @@ export function Vstack_ffa9eeb46d538d67a238a02fc887096a () {
   )
 }
 
-export function Plot_e15c860e2b9245a632aaf379db84a2bb () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
+export function Box_734ae6c210594eaaf846fe102a7fba60 () {
+  
+    const handleSubmit_8b74d8006b0d5701060d87e780924d8e = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.pert_site.handle_edges_submit", {new_edges:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+  const [addEvents, connectError] = useContext(EventLoopContext);
 
 
   return (
-    <Plot data={state__pert_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
-  )
-}
-
-export function Select_ea4d06f5ff39f94640f82b0aeccf21ae () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
-  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Select_64ebab49ff0c29c11d8aa3d43b8090fe () {
-  const state__pert_site = useContext(StateContexts.state__pert_site)
-
-
-  return (
-    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
-  {state__pert_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
+    <Box as={`form`} onSubmit={handleSubmit_8b74d8006b0d5701060d87e780924d8e}>
+  <HStack>
+  <Select_dde139c54fa256b2c2aac66b80016077/>
+  <Select_43e029aa74fdf11aa64884ce31d6a1f4/>
+  <Button type={`submit`}>
+  {`Add edge`}
+</Button>
+</HStack>
+</Box>
   )
 }
 
@@ -341,9 +341,9 @@ export default function Component() {
   <Heading size={`md`}>
   {`Node creation`}
 </Heading>
-  <Box_d2611b7d2862c3ae6d80ec409ae5acca/>
+  <Box_b5728a802ab8729598fa1d4cdebf8f0c/>
   <Divider/>
-  <Box_b32636e2868f591e4e6348c61603da6e/>
+  <Box_36238ec8569869e1a7a58f25616d068d/>
 </VStack>
 </VStack>
 </Box>
@@ -353,7 +353,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge creation`}
 </Heading>
-  <Box_b0b0c22cbc7a19734d06f8b39728d813/>
+  <Box_734ae6c210594eaaf846fe102a7fba60/>
 </VStack>
 </Box>
 </HStack>
@@ -364,7 +364,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Node deletion`}
 </Heading>
-  <Box_5b6ddbb9bb444b64f404994083139292/>
+  <Box_5a2da317080959302d058aa7b03872fc/>
 </VStack>
 </Box>
   <Box sx={{"width": "10%"}}/>
@@ -373,7 +373,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge deletion`}
 </Heading>
-  <Box_620107cbc750cbc3bd284668b16c3a30/>
+  <Box_33a215e7afbde1e270e7975c75bc221c/>
 </VStack>
 </Box>
 </HStack>
