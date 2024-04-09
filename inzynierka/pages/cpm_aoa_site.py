@@ -2,19 +2,21 @@ import pandas as pd
 import plotly.graph_objects as go
 import reflex as rx
 
-from .pert_graph import PERT_graph
+from inzynierka.pages.cpm_aoa_graph import CPM_graph
 from ..templates import template
 
 
-class pert_site(rx.State):
-    G: PERT_graph = PERT_graph()
+class cpm_aoa_site(rx.State):
+    G: CPM_graph = CPM_graph()
     node_fields: list[str] = []
     input_json: str
 
     @rx.cached_var
     def form_node_placeholders(self) -> list[str]:
         return [
-            " ".join(w.capitalize() for w in field.split("_"))
+            " ".join(
+                w.capitalize() for w in field.split("_")
+            )
             for field in self.node_fields
         ]
 
@@ -43,12 +45,11 @@ class pert_site(rx.State):
         self.G.add_edge(predecessor, successor)
 
     def handle_nodes_submit(self, nodes: dict[str, float]):
-        for field in self.node_fields:
+        for key, value in nodes.items():
             try:
-                self.G.add_node(field, float(nodes[field + '_most_likely']), float(nodes[field + '_pessimistic_time']),
-                                float(nodes[field + '_optimistic_time']))
+                self.G.add_node(key, float(value))
             except ValueError:
-                self.G.add_node(field, 0, 0, 0)
+                self.G.add_node(key, 0)
         self.node_fields.clear()
 
     def handle_node_deletion(self, node: dict):
@@ -86,11 +87,11 @@ class pert_site(rx.State):
         self.G.set_data_json(self.input_json)
 
 
-@template(route="/pert_graph", title="PERT", image="/github.svg")
-def pert_graph():
+@template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
+def graph():
     return rx.chakra.vstack(
         # plotly graph
-        rx.plotly(data=pert_site.cpm_plotly,
+        rx.plotly(data=cpm_aoa_site.cpm_plotly,
                   layout=dict(
                       showlegend=False,
                       hovermode='closest',
@@ -98,6 +99,8 @@ def pert_graph():
                       xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                       yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                   ),
+        rx.chakra.divider(),
+        rx.image(src="/foo.png"),
         rx.chakra.divider(),
         rx.chakra.hstack(
             # edges form
@@ -113,33 +116,22 @@ def pert_graph():
                                 ),
                                 rx.chakra.button("+", type_="submit"),
                             ),
-                            on_submit=pert_site.add_node_field,
+                            on_submit=cpm_aoa_site.add_node_field,
                             reset_on_submit=True,
                         ),
                         rx.chakra.divider(),
                         rx.chakra.form(
                             rx.chakra.vstack(
                                 rx.foreach(
-                                    pert_site.node_fields,
-                                    lambda field, idx:
-                                    rx.chakra.hstack(
-                                        rx.chakra.input(
-                                            placeholder=pert_site.form_node_placeholders[idx] + ' most likely time',
-                                            name=field + '_most_likely',
-                                        ),
-                                        rx.chakra.input(
-                                            placeholder=pert_site.form_node_placeholders[idx] + ' pessimistic time',
-                                            name=field + '_pessimistic_time',
-                                        ),
-                                        rx.chakra.input(
-                                            placeholder=pert_site.form_node_placeholders[idx] + ' optimistic time',
-                                            name=field + '_optimistic_time',
-                                        ),
+                                    cpm_aoa_site.node_fields,
+                                    lambda field, idx: rx.chakra.input(
+                                        placeholder=cpm_aoa_site.form_node_placeholders[idx] + ' node time',
+                                        name=field,
                                     ),
                                 ),
                                 rx.chakra.button("Submit", type_="submit"),
                             ),
-                            on_submit=pert_site.handle_nodes_submit,
+                            on_submit=cpm_aoa_site.handle_nodes_submit,
                             reset_on_submit=True,
                         )
                     )
@@ -156,17 +148,15 @@ def pert_graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                pert_site.nodes_list, placeholder="Select predecessor node.", size="xs",
-                                name='predecessor'
+                                cpm_aoa_site.nodes_list, placeholder="Select predecessor node.", size="xs", name='predecessor'
                             ),
                             rx.chakra.select(
-                                pert_site.nodes_list, placeholder="Select successor node.", size="xs",
-                                name='successor'
+                                cpm_aoa_site.nodes_list, placeholder="Select successor node.", size="xs", name='successor'
                             ),
                             rx.chakra.button(
                                 "Add edge", type_="submit"
                             )),
-                        on_submit=pert_site.handle_edges_submit,
+                        on_submit=cpm_aoa_site.handle_edges_submit,
                         reset_on_submit=True,
 
                     )
@@ -187,12 +177,12 @@ def pert_graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                pert_site.nodes_list, placeholder="Select node to delete.", size="xs", name='node_del'
+                                cpm_aoa_site.nodes_list, placeholder="Select node to delete.", size="xs", name='node_del'
                             ),
                             rx.chakra.button(
                                 "Delete node", type_="submit"
                             )),
-                        on_submit=pert_site.handle_node_deletion,
+                        on_submit=cpm_aoa_site.handle_node_deletion,
                         reset_on_submit=True,
                     )
                 ),
@@ -208,12 +198,12 @@ def pert_graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                pert_site.edges_list, placeholder="Select edge to delete.", size="xs", name='edge_del'
+                                cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="xs", name='edge_del'
                             ),
                             rx.chakra.button(
                                 "Delete edge", type_="submit"
                             )),
-                        on_submit=pert_site.handle_edge_deletion,
+                        on_submit=cpm_aoa_site.handle_edge_deletion,
                         reset_on_submit=True,
                     ),
                 ),
@@ -225,7 +215,7 @@ def pert_graph():
         rx.chakra.divider(),
         # dataframe
         rx.data_table(
-            data=pert_site.cpm_dataframe,
+            data=cpm_aoa_site.cpm_dataframe,
             pagination=True,
             search=True,
         ),
@@ -234,9 +224,9 @@ def pert_graph():
         rx.chakra.hstack(
             # output
             rx.chakra.box(
-                rx.chakra.heading("Data output", size='md'),
+                rx.chakra.heading("Graph output", size='md'),
                 rx.chakra.text_area(
-                    value=pert_site.cpm_json,
+                    value=cpm_aoa_site.cpm_json,
                     is_read_only=True
                 ),
                 width='45%'
@@ -246,16 +236,16 @@ def pert_graph():
             ),
             # input
             rx.chakra.box(
-                rx.chakra.heading("Data input", size='md'),
+                rx.chakra.heading("Graph input", size='md'),
                 rx.chakra.editable(
                     rx.chakra.editable_preview(),
                     rx.chakra.editable_textarea(),
-                    placeholder="Paste your data here...",
-                    on_change=pert_site.set_input_json,
+                    placeholder="Paste your graph here...",
+                    on_change=cpm_aoa_site.set_input_json,
                     width="100%"
                 ),
 
-                rx.chakra.button("Confirm Input", type_="submit", on_click=pert_site.submit_input),
+                rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
 
                 width='45%'
             ),

@@ -1,13 +1,19 @@
+/** @jsxImportSource @emotion/react */
 
-/** @jsxImportSource @emotion/react */import { Fragment, useCallback, useContext } from "react"
-import { Fragment_fd0e7cb8f9fb4669a6805377d925fba0, Hstack_64f60074debfa1fa62a17858ad720cb2, Hstack_ddaaa401ae3de063c77150b143673906 } from "/utils/stateful_components"
+
+import { Fragment, useCallback, useContext } from "react"
+import { EventLoopContext, StateContexts } from "/utils/context"
+import { Event, getBackendURL, getRefValue, getRefValues, isTrue, set_val } from "/utils/state"
+import { WifiOffIcon as LucideWifiOffIcon } from "lucide-react"
+import { keyframes } from "@emotion/react"
+import { Dialog as RadixThemesDialog, Text as RadixThemesText, Theme as RadixThemesTheme } from "@radix-ui/themes"
+import env from "/env.json"
 import { Box, Button, Center, Divider, Editable, EditablePreview, EditableTextarea, Heading, HStack, Image as ChakraImage, Input, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, option, Select, Spacer, Text, Textarea, VStack } from "@chakra-ui/react"
-import "focus-visible/dist/focus-visible"
-import "gridjs/dist/theme/mermaid.css"
 import NextLink from "next/link"
 import dynamic from "next/dynamic"
-import { EventLoopContext, StateContexts } from "/utils/context"
-import { Event, getRefValue, getRefValues, set_val } from "/utils/state"
+import "@radix-ui/themes/styles.css"
+import "gridjs/dist/theme/mermaid.css"
+import theme from "/utils/theme.js"
 import { Grid as DataTableGrid } from "gridjs-react"
 import { HamburgerIcon } from "@chakra-ui/icons"
 import NextHead from "next/head"
@@ -15,75 +21,15 @@ import NextHead from "next/head"
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 
-export function Select_69dee95a2100e3675492c3eaabbfd2f9 () {
+export function Vstack_68538e993aceba180eebe9f5c7fcebc6 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
-
-  return (
-    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
-  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Editable_c6e44ada01aaf3859b128b489ae87c86 () {
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-  const on_change_b4667367be6fc0e95ddabba8e72ddf90 = useCallback((_e0) => addEvents([Event("state.cpm_site.set_input_json", {input_json:_e0})], (_e0), {}), [addEvents, Event])
-
-  return (
-    <Editable onChange={on_change_b4667367be6fc0e95ddabba8e72ddf90} placeholder={`Paste your graph here...`} sx={{"width": "100%"}}>
-  <EditablePreview/>
-  <EditableTextarea/>
-</Editable>
-  )
-}
-
-export function Grid_ce4746415b41eeb5905e93eb00c8fc85 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-  return (
-    <DataTableGrid columns={state__cpm_site.cpm_dataframe.columns} data={state__cpm_site.cpm_dataframe.data} pagination={true} search={true}/>
-  )
-}
-
-export function Select_ae9d229daf1df5178be2eb4509661de8 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-  return (
-    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
-  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Plot_10a47ad0e2b2dc63eb1fc78c51e4cae1 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-  return (
-    <Plot data={state__cpm_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
-  )
-}
-
-export function Vstack_b872430667311c523949dc6bb83e81e3 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
   return (
     <VStack>
   {state__cpm_site.node_fields.map((field, idx) => (
-  <Input key={idx} name={field} placeholder={(state__cpm_site.form_node_placeholders.at(idx) + " node time")} type={`text`}/>
+  <Input key={idx} name={field} placeholder={((state__cpm_site.form_node_placeholders.at(idx)) + (" node time"))}/>
 ))}
   <Button type={`submit`}>
   {`Submit`}
@@ -92,39 +38,42 @@ export function Vstack_b872430667311c523949dc6bb83e81e3 () {
   )
 }
 
-export function Box_167d971ddd7ed84fbb555a61bfa7671e () {
-  
-    const handleSubmit_1547fa60ebe84e4e831963ded8b2c528 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+export function Fragment_34f041f6aae0b1134e0b2a186d19d162 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
 
-        addEvents([Event("state.cpm_site.handle_edges_submit", {new_edges:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-  const [addEvents, connectError] = useContext(EventLoopContext);
 
 
   return (
-    <Box as={`form`} onSubmit={handleSubmit_1547fa60ebe84e4e831963ded8b2c528}>
-  <HStack>
-  <Select_ae9d229daf1df5178be2eb4509661de8/>
-  <Select_010d7ef94c867f806ab9073083393293/>
-  <Button type={`submit`}>
-  {`Add edge`}
-</Button>
-</HStack>
-</Box>
+    <Fragment>
+  {isTrue(connectErrors.length >= 2) ? (
+  <Fragment>
+  <RadixThemesDialog.Root css={{"zIndex": 9999}} open={connectErrors.length >= 2}>
+  <RadixThemesDialog.Content>
+  <RadixThemesDialog.Title>
+  {`Connection Error`}
+</RadixThemesDialog.Title>
+  <RadixThemesText as={`p`}>
+  {`Cannot connect to server: `}
+  {(connectErrors.length > 0) ? connectErrors[connectErrors.length - 1].message : ''}
+  {`. Check if server is reachable at `}
+  {getBackendURL(env.EVENT).href}
+</RadixThemesText>
+</RadixThemesDialog.Content>
+</RadixThemesDialog.Root>
+</Fragment>
+) : (
+  <Fragment/>
+)}
+</Fragment>
   )
 }
 
-export function Box_102e6c40293b476ada74a43145942cc6 () {
+export function Box_4a76b8efa1c572b4b4fc1af2c2e29347 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
   
-    const handleSubmit_819788f77ac55ec0cefbd5240cf5e980 = useCallback((ev) => {
+    const handleSubmit_8df258c6c30a877d8767b802f7ab6b08 = useCallback((ev) => {
         const $form = ev.target
         ev.preventDefault()
         const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
@@ -136,13 +85,11 @@ export function Box_102e6c40293b476ada74a43145942cc6 () {
         }
     })
     
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
 
   return (
-    <Box as={`form`} onSubmit={handleSubmit_819788f77ac55ec0cefbd5240cf5e980}>
+    <Box as={`form`} onSubmit={handleSubmit_8df258c6c30a877d8767b802f7ab6b08}>
   <HStack>
-  <Select_6eba250587c946950903cdce1ad22230/>
+  <Select_fb32c2162724c1ab9ebb7c046aef0485/>
   <Button type={`submit`}>
   {`Delete edge`}
 </Button>
@@ -151,126 +98,9 @@ export function Box_102e6c40293b476ada74a43145942cc6 () {
   )
 }
 
-export function Box_9c7fafd01ffa28f87145ab3ff6a9e487 () {
-  
-    const handleSubmit_fcc2c71f519cfb2019ba131e83e1cf0d = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.handle_nodes_submit", {nodes:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_fcc2c71f519cfb2019ba131e83e1cf0d}>
-  <Vstack_b872430667311c523949dc6bb83e81e3/>
-</Box>
-  )
-}
-
-export function Select_6eba250587c946950903cdce1ad22230 () {
+export function Select_1a7522c34fb13e88d1f14d71e93a64d2 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
-
-  return (
-    <Select name={`edge_del`} placeholder={`Select edge to delete.`} size={`xs`}>
-  {state__cpm_site.edges_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Textarea_3b8a5f2d57cd65201cb1c81a73180032 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-  return (
-    <Textarea isReadOnly={true} value={state__cpm_site.cpm_json}/>
-  )
-}
-
-export function Box_6ce658f2e4a6ded77653b1cc0b679280 () {
-  
-    const handleSubmit_f3c49764cb0c6cf1bf1a9215af5c5293 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.handle_node_deletion", {node:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_f3c49764cb0c6cf1bf1a9215af5c5293}>
-  <HStack>
-  <Select_69dee95a2100e3675492c3eaabbfd2f9/>
-  <Button type={`submit`}>
-  {`Delete node`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Box_953667e84f059e981bc7b1151bef26d6 () {
-  
-    const handleSubmit_05b89430c1fc0237409fa19fe67b57fe = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.add_node_field", {new_nodes:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_05b89430c1fc0237409fa19fe67b57fe}>
-  <HStack>
-  <Input name={`new_field`} placeholder={`Add node name`} type={`text`}/>
-  <Button type={`submit`}>
-  {`+`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Button_8ba5ea546b1f02ee752567033e6d0587 () {
-  const [addEvents, connectError] = useContext(EventLoopContext);
-
-  const on_click_289cc6c8a36f7ede63249de0b5de4b20 = useCallback((_e) => addEvents([Event("state.cpm_site.submit_input", {})], (_e), {}), [addEvents, Event])
-
-  return (
-    <Button onClick={on_click_289cc6c8a36f7ede63249de0b5de4b20} type={`submit`}>
-  {`Confirm Input`}
-</Button>
-  )
-}
-
-export function Select_010d7ef94c867f806ab9073083393293 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
   return (
@@ -284,11 +114,310 @@ export function Select_010d7ef94c867f806ab9073083393293 () {
   )
 }
 
+export function Select_fb32c2162724c1ab9ebb7c046aef0485 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Select name={`edge_del`} placeholder={`Select edge to delete.`} size={`xs`}>
+  {state__cpm_site.edges_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Select_46eed37486c35ddbec67537c9e402cd5 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
+  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Box_c50019fa2b378944aceb32288d9161da () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_1818a70fbaa179d36f70fe9b441ed50f = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.handle_edges_submit", {new_edges:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_1818a70fbaa179d36f70fe9b441ed50f}>
+  <HStack>
+  <Select_b77fe2dca6a1b034c995196143659dc4/>
+  <Select_1a7522c34fb13e88d1f14d71e93a64d2/>
+  <Button type={`submit`}>
+  {`Add edge`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Select_b77fe2dca6a1b034c995196143659dc4 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
+  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Textarea_3b8a5f2d57cd65201cb1c81a73180032 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Textarea isReadOnly={true} value={state__cpm_site.cpm_json}/>
+  )
+}
+
+export function Box_77930b80b2346cc5c76c1c9984d17df6 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_059747424201efbbbb366a919e010fe5 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.handle_node_deletion", {node:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_059747424201efbbbb366a919e010fe5}>
+  <HStack>
+  <Select_46eed37486c35ddbec67537c9e402cd5/>
+  <Button type={`submit`}>
+  {`Delete node`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Hstack_84a9c39c59adfdb98326bd425bc36583 () {
+  const state = useContext(StateContexts.state)
+
+
+
+  return (
+    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
+  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
+  <Text>
+  {`PERT`}
+</Text>
+</HStack>
+  )
+}
+
+export function Fragment_3ea1a0318ded176a3888f943242093c6 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+
+  return (
+    <Fragment>
+  {isTrue(connectErrors.length > 0) ? (
+  <Fragment>
+  <LucideWifiOffIcon css={{"color": "crimson", "zIndex": 9999, "position": "fixed", "bottom": "30px", "right": "30px", "animation": `${pulse} 1s infinite`}} size={32}/>
+</Fragment>
+) : (
+  <Fragment/>
+)}
+</Fragment>
+  )
+}
+
+export function Hstack_08d061ff7d68b9dc0044e5bcedc5be88 () {
+  const state = useContext(StateContexts.state)
+
+
+
+  return (
+    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/cpm aoa")) || ((((state.router.page.path) === ("/")) && ("CPM AoA")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/cpm aoa")) || ((((state.router.page.path) === ("/")) && ("CPM AoA")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
+  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
+  <Text>
+  {`CPM AoA`}
+</Text>
+</HStack>
+  )
+}
+
+export function Box_fd9129b27c8240bc6e13c376e585a12a () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_83fb8c857df5a808cca0f18c637ff25a = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.handle_nodes_submit", {nodes:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_83fb8c857df5a808cca0f18c637ff25a}>
+  <Vstack_68538e993aceba180eebe9f5c7fcebc6/>
+</Box>
+  )
+}
+
+export function Button_8ba5ea546b1f02ee752567033e6d0587 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+  const on_click_289cc6c8a36f7ede63249de0b5de4b20 = useCallback((_e) => addEvents([Event("state.cpm_site.submit_input", {})], (_e), {}), [addEvents, Event])
+
+
+  return (
+    <Button onClick={on_click_289cc6c8a36f7ede63249de0b5de4b20} type={`submit`}>
+  {`Confirm Input`}
+</Button>
+  )
+}
+
+export function Plot_10a47ad0e2b2dc63eb1fc78c51e4cae1 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Plot data={state__cpm_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
+  )
+}
+
+export function Grid_ce4746415b41eeb5905e93eb00c8fc85 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <DataTableGrid columns={state__cpm_site.cpm_dataframe.columns} data={state__cpm_site.cpm_dataframe.data} pagination={true} search={true}/>
+  )
+}
+
+export function Editable_c6e44ada01aaf3859b128b489ae87c86 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+  const on_change_b4667367be6fc0e95ddabba8e72ddf90 = useCallback((_e0) => addEvents([Event("state.cpm_site.set_input_json", {input_json:_e0})], (_e0), {}), [addEvents, Event])
+
+
+  return (
+    <Editable onChange={on_change_b4667367be6fc0e95ddabba8e72ddf90} placeholder={`Paste your graph here...`} sx={{"width": "100%"}}>
+  <EditablePreview/>
+  <EditableTextarea/>
+</Editable>
+  )
+}
+
+export function Box_e5eae12f273f40a3a69835904faef78d () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_010fdf79b390b258c7d636c7691532d0 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.add_node_field", {new_nodes:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_010fdf79b390b258c7d636c7691532d0}>
+  <HStack>
+  <Input name={`new_field`} placeholder={`Add node name`}/>
+  <Button type={`submit`}>
+  {`+`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+const pulse = keyframes`
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+`
+
+
+export function Hstack_c79ea6062abcf717b3bd6cad03600478 () {
+  const state = useContext(StateContexts.state)
+
+
+
+  return (
+    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
+  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
+  <Text>
+  {`CPM`}
+</Text>
+</HStack>
+  )
+}
+
 export default function Component() {
 
   return (
     <Fragment>
-  <Fragment_fd0e7cb8f9fb4669a6805377d925fba0/>
+  <Fragment>
+  <div css={{"position": "fixed", "width": "100vw", "height": "0"}}>
+  <Fragment_3ea1a0318ded176a3888f943242093c6/>
+</div>
+  <Fragment_34f041f6aae0b1134e0b2a186d19d162/>
+</Fragment>
   <HStack alignItems={`flex-start`} sx={{"transition": "left 0.5s, width 0.5s", "position": "relative"}}>
   <Box sx={{"display": ["none", "none", "block"], "minWidth": "20em", "height": "100%", "position": "sticky", "top": "0px", "borderRight": "1px solid #F4F3F6"}}>
   <VStack sx={{"height": "100dvh"}}>
@@ -296,17 +425,20 @@ export default function Component() {
   <ChakraImage src={`/icon.svg`} sx={{"height": "2em"}}/>
   <Spacer/>
   <Link as={NextLink} href={`https://github.com/reflex-dev/reflex`}>
-  <Center sx={{"boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "bg": "transparent", "borderRadius": "0.375rem", "_hover": {"bg": "#F5EFFE"}}}>
+  <Center sx={{"boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "background": "transparent", "borderRadius": "0.375rem", "_hover": {"background": "#F5EFFE"}}}>
   <ChakraImage src={`/github.svg`} sx={{"height": "3em", "padding": "0.5em"}}/>
 </Center>
 </Link>
 </HStack>
   <VStack alignItems={`flex-start`} sx={{"width": "100%", "overflowY": "auto", "padding": "1em"}}>
   <Link as={NextLink} href={`/`} sx={{"width": "100%"}}>
-  <Hstack_64f60074debfa1fa62a17858ad720cb2/>
+  <Hstack_c79ea6062abcf717b3bd6cad03600478/>
+</Link>
+  <Link as={NextLink} href={`/cpm_AoA`} sx={{"width": "100%"}}>
+  <Hstack_08d061ff7d68b9dc0044e5bcedc5be88/>
 </Link>
   <Link as={NextLink} href={`/pert_graph`} sx={{"width": "100%"}}>
-  <Hstack_ddaaa401ae3de063c77150b143673906/>
+  <Hstack_84a9c39c59adfdb98326bd425bc36583/>
 </Link>
 </VStack>
   <Spacer/>
@@ -325,7 +457,7 @@ export default function Component() {
 </HStack>
 </VStack>
 </Box>
-  <Box sx={{"paddingTop": "5em", "paddingX": ["auto", "2em"], "flex": "1"}}>
+  <Box sx={{"paddingTop": "5em", "paddingInlineStart": ["auto", "2em"], "paddingInlineEnd": ["auto", "2em"], "flex": "1"}}>
   <Box sx={{"alignItems": "flex-start", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "borderRadius": "0.375rem", "padding": "1em", "marginBottom": "2em"}}>
   <VStack>
   <Plot_10a47ad0e2b2dc63eb1fc78c51e4cae1/>
@@ -337,9 +469,9 @@ export default function Component() {
   <Heading size={`md`}>
   {`Node creation`}
 </Heading>
-  <Box_953667e84f059e981bc7b1151bef26d6/>
+  <Box_e5eae12f273f40a3a69835904faef78d/>
   <Divider/>
-  <Box_9c7fafd01ffa28f87145ab3ff6a9e487/>
+  <Box_fd9129b27c8240bc6e13c376e585a12a/>
 </VStack>
 </VStack>
 </Box>
@@ -349,7 +481,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge creation`}
 </Heading>
-  <Box_167d971ddd7ed84fbb555a61bfa7671e/>
+  <Box_c50019fa2b378944aceb32288d9161da/>
 </VStack>
 </Box>
 </HStack>
@@ -360,7 +492,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Node deletion`}
 </Heading>
-  <Box_6ce658f2e4a6ded77653b1cc0b679280/>
+  <Box_77930b80b2346cc5c76c1c9984d17df6/>
 </VStack>
 </Box>
   <Box sx={{"width": "10%"}}/>
@@ -369,7 +501,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge deletion`}
 </Heading>
-  <Box_102e6c40293b476ada74a43145942cc6/>
+  <Box_4a76b8efa1c572b4b4fc1af2c2e29347/>
 </VStack>
 </Box>
 </HStack>
@@ -401,23 +533,28 @@ export default function Component() {
   <HamburgerIcon sx={{"size": "4em", "color": "black"}}/>
 </MenuButton>
   <MenuList>
-  <MenuItem sx={{"_hover": {"bg": "#F5EFFE"}}}>
+  <MenuItem sx={{"_hover": {"background": "#F5EFFE"}}}>
   <Link as={NextLink} href={`/`} sx={{"width": "100%"}}>
   {`CPM`}
 </Link>
 </MenuItem>
-  <MenuItem sx={{"_hover": {"bg": "#F5EFFE"}}}>
+  <MenuItem sx={{"_hover": {"background": "#F5EFFE"}}}>
+  <Link as={NextLink} href={`/cpm_AoA`} sx={{"width": "100%"}}>
+  {`CPM AoA`}
+</Link>
+</MenuItem>
+  <MenuItem sx={{"_hover": {"background": "#F5EFFE"}}}>
   <Link as={NextLink} href={`/pert_graph`} sx={{"width": "100%"}}>
   {`PERT`}
 </Link>
 </MenuItem>
   <MenuDivider/>
-  <MenuItem sx={{"_hover": {"bg": "#F5EFFE"}}}>
+  <MenuItem sx={{"_hover": {"background": "#F5EFFE"}}}>
   <Link as={NextLink} href={`https://github.com/reflex-dev`} sx={{"width": "100%"}}>
   {`About`}
 </Link>
 </MenuItem>
-  <MenuItem sx={{"_hover": {"bg": "#F5EFFE"}}}>
+  <MenuItem sx={{"_hover": {"background": "#F5EFFE"}}}>
   <Link as={NextLink} href={`mailto:founders@=reflex.dev`} sx={{"width": "100%"}}>
   {`Contact`}
 </Link>
@@ -430,7 +567,6 @@ export default function Component() {
   <title>
   {`CPM`}
 </title>
-  <meta content={`A Reflex app.`} name={`description`}/>
   <meta content={`/github.svg`} property={`og:image`}/>
   <meta content={`width=device-width, shrink-to-fit=no, initial-scale=1`} name={`viewport`}/>
 </NextHead>

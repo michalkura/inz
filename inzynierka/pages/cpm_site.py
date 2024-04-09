@@ -89,7 +89,7 @@ class cpm_site(rx.State):
 
 @template(route="/", title="CPM", image="/github.svg")
 def graph():
-    return rx.vstack(
+    return rx.chakra.vstack(
         # plotly graph
         rx.plotly(data=cpm_site.cpm_plotly,
                   layout=dict(
@@ -99,35 +99,35 @@ def graph():
                       xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                       yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                   ),
-        rx.divider(),
-        rx.hstack(
+        rx.chakra.divider(),
+        rx.chakra.hstack(
             # edges form
-            rx.box(
-                rx.vstack(
-                    rx.vstack(
-                        rx.heading("Node creation", size='md'),
-                        rx.form(
-                            rx.hstack(
-                                rx.input(
+            rx.chakra.box(
+                rx.chakra.vstack(
+                    rx.chakra.vstack(
+                        rx.chakra.heading("Node creation", size='md'),
+                        rx.chakra.form(
+                            rx.chakra.hstack(
+                                rx.chakra.input(
                                     placeholder="Add node name",
                                     name="new_field",
                                 ),
-                                rx.button("+", type_="submit"),
+                                rx.chakra.button("+", type_="submit"),
                             ),
                             on_submit=cpm_site.add_node_field,
                             reset_on_submit=True,
                         ),
-                        rx.divider(),
-                        rx.form(
-                            rx.vstack(
+                        rx.chakra.divider(),
+                        rx.chakra.form(
+                            rx.chakra.vstack(
                                 rx.foreach(
                                     cpm_site.node_fields,
-                                    lambda field, idx: rx.input(
+                                    lambda field, idx: rx.chakra.input(
                                         placeholder=cpm_site.form_node_placeholders[idx] + ' node time',
                                         name=field,
                                     ),
                                 ),
-                                rx.button("Submit", type_="submit"),
+                                rx.chakra.button("Submit", type_="submit"),
                             ),
                             on_submit=cpm_site.handle_nodes_submit,
                             reset_on_submit=True,
@@ -136,22 +136,22 @@ def graph():
                 ),
                 width="45%"
             ),
-            rx.box(
+            rx.chakra.box(
                 width="10%"
             ),
             # edges form
-            rx.box(
-                rx.vstack(
-                    rx.heading("Edge creation", size='md'),
-                    rx.form(
-                        rx.hstack(
-                            rx.select(
+            rx.chakra.box(
+                rx.chakra.vstack(
+                    rx.chakra.heading("Edge creation", size='md'),
+                    rx.chakra.form(
+                        rx.chakra.hstack(
+                            rx.chakra.select(
                                 cpm_site.nodes_list, placeholder="Select predecessor node.", size="xs", name='predecessor'
                             ),
-                            rx.select(
+                            rx.chakra.select(
                                 cpm_site.nodes_list, placeholder="Select successor node.", size="xs", name='successor'
                             ),
-                            rx.button(
+                            rx.chakra.button(
                                 "Add edge", type_="submit"
                             )),
                         on_submit=cpm_site.handle_edges_submit,
@@ -165,19 +165,19 @@ def graph():
             width="100%",
             align_items='start'
         ),
-        rx.divider(),
+        rx.chakra.divider(),
 
-        rx.hstack(
+        rx.chakra.hstack(
             # node deletion
-            rx.box(
-                rx.vstack(
-                    rx.heading("Node deletion", size='md'),
-                    rx.form(
-                        rx.hstack(
-                            rx.select(
+            rx.chakra.box(
+                rx.chakra.vstack(
+                    rx.chakra.heading("Node deletion", size='md'),
+                    rx.chakra.form(
+                        rx.chakra.hstack(
+                            rx.chakra.select(
                                 cpm_site.nodes_list, placeholder="Select node to delete.", size="xs", name='node_del'
                             ),
-                            rx.button(
+                            rx.chakra.button(
                                 "Delete node", type_="submit"
                             )),
                         on_submit=cpm_site.handle_node_deletion,
@@ -186,19 +186,19 @@ def graph():
                 ),
                 width='45%'
             ),
-            rx.box(
+            rx.chakra.box(
                 width='10%'
             ),
             # edge deletion
-            rx.box(
-                rx.vstack(
-                    rx.heading("Edge deletion", size='md'),
-                    rx.form(
-                        rx.hstack(
-                            rx.select(
+            rx.chakra.box(
+                rx.chakra.vstack(
+                    rx.chakra.heading("Edge deletion", size='md'),
+                    rx.chakra.form(
+                        rx.chakra.hstack(
+                            rx.chakra.select(
                                 cpm_site.edges_list, placeholder="Select edge to delete.", size="xs", name='edge_del'
                             ),
-                            rx.button(
+                            rx.chakra.button(
                                 "Delete edge", type_="submit"
                             )),
                         on_submit=cpm_site.handle_edge_deletion,
@@ -210,40 +210,40 @@ def graph():
             width='100%',
             align_items='start'
         ),
-        rx.divider(),
+        rx.chakra.divider(),
         # dataframe
         rx.data_table(
             data=cpm_site.cpm_dataframe,
             pagination=True,
             search=True,
         ),
-        rx.divider(),
+        rx.chakra.divider(),
         # graph io
-        rx.hstack(
+        rx.chakra.hstack(
             # output
-            rx.box(
-                rx.heading("Graph output", size='md'),
-                rx.text_area(
+            rx.chakra.box(
+                rx.chakra.heading("Graph output", size='md'),
+                rx.chakra.text_area(
                     value=cpm_site.cpm_json,
                     is_read_only=True
                 ),
                 width='45%'
             ),
-            rx.box(
+            rx.chakra.box(
                 width='10%'
             ),
             # input
-            rx.box(
-                rx.heading("Graph input", size='md'),
-                rx.editable(
-                    rx.editable_preview(),
-                    rx.editable_textarea(),
+            rx.chakra.box(
+                rx.chakra.heading("Graph input", size='md'),
+                rx.chakra.editable(
+                    rx.chakra.editable_preview(),
+                    rx.chakra.editable_textarea(),
                     placeholder="Paste your graph here...",
                     on_change=cpm_site.set_input_json,
                     width="100%"
                 ),
 
-                rx.button("Confirm Input", type_="submit", on_click=cpm_site.submit_input),
+                rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_site.submit_input),
 
                 width='45%'
             ),
