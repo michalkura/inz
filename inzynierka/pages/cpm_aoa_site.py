@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import reflex as rx
 
+from PIL import Image
 from inzynierka.pages.cpm_aoa_graph import CPM_graph
 from ..templates import template
 
@@ -86,6 +87,10 @@ class cpm_aoa_site(rx.State):
     def submit_input(self):
         self.G.set_data_json(self.input_json)
 
+    @rx.var
+    def cmp_image(self) -> Image:
+        return self.G.export_graph_img()
+
 
 @template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
 def graph():
@@ -100,7 +105,7 @@ def graph():
                       yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                   ),
         rx.chakra.divider(),
-        rx.image(src="/foo.png"),
+        rx.image(src=cpm_aoa_site.cmp_image),
         rx.chakra.divider(),
         rx.chakra.hstack(
             # edges form
@@ -148,10 +153,12 @@ def graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                cpm_aoa_site.nodes_list, placeholder="Select predecessor node.", size="xs", name='predecessor'
+                                cpm_aoa_site.nodes_list, placeholder="Select predecessor node.", size="xs",
+                                name='predecessor'
                             ),
                             rx.chakra.select(
-                                cpm_aoa_site.nodes_list, placeholder="Select successor node.", size="xs", name='successor'
+                                cpm_aoa_site.nodes_list, placeholder="Select successor node.", size="xs",
+                                name='successor'
                             ),
                             rx.chakra.button(
                                 "Add edge", type_="submit"
@@ -177,7 +184,8 @@ def graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                cpm_aoa_site.nodes_list, placeholder="Select node to delete.", size="xs", name='node_del'
+                                cpm_aoa_site.nodes_list, placeholder="Select node to delete.", size="xs",
+                                name='node_del'
                             ),
                             rx.chakra.button(
                                 "Delete node", type_="submit"
@@ -198,7 +206,8 @@ def graph():
                     rx.chakra.form(
                         rx.chakra.hstack(
                             rx.chakra.select(
-                                cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="xs", name='edge_del'
+                                cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="xs",
+                                name='edge_del'
                             ),
                             rx.chakra.button(
                                 "Delete edge", type_="submit"

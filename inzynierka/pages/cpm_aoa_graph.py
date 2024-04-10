@@ -4,7 +4,9 @@ import networkx as nx
 import pandas as pd
 import plotly.graph_objects as go
 import reflex as rx
+import matplotlib
 from matplotlib import pyplot as plt
+from PIL import Image
 
 from inzynierka.pages.addEdge import addEdge
 
@@ -227,10 +229,9 @@ class CPM_graph(rx.Base):
                                 marker=dict(showscale=False, color=colors, size=nodeSize),
                                 name=''
                                 )
-        self.export_graph_img()
         return go.Figure(data=[edge_trace, node_trace])
 
-    def export_graph_img(self):
+    def export_graph_img(self) -> Image:
         G = self.get_graph_from_data()
         for layer, nodes in enumerate(nx.topological_generations(G)):
             # `multipartite_layout` expects the layer as a node attribute, so add the
@@ -241,8 +242,10 @@ class CPM_graph(rx.Base):
         # Compute the multipartite_layout using the "layer" node attribute
         pos = nx.multipartite_layout(G, subset_key="layer")
 
+        matplotlib.use('AGG')
         fig, ax = plt.subplots()
         nx.draw_networkx(G, pos=pos, ax=ax)
         ax.set_title("DAG layout in topological order")
         fig.tight_layout()
-        plt.savefig('assets/foo.png')
+        fig.canvas.draw()
+        return Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())

@@ -21,7 +21,47 @@ import NextHead from "next/head"
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 
-export function Vstack_68538e993aceba180eebe9f5c7fcebc6 () {
+const pulse = keyframes`
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+`
+
+
+export function Box_e5eae12f273f40a3a69835904faef78d () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_010fdf79b390b258c7d636c7691532d0 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.add_node_field", {new_nodes:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_010fdf79b390b258c7d636c7691532d0}>
+  <HStack>
+  <Input name={`new_field`} placeholder={`Add node name`}/>
+  <Button type={`submit`}>
+  {`+`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Vstack_0f0a4090fd218c228a1abf85551ed2b8 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
@@ -68,53 +108,7 @@ export function Fragment_34f041f6aae0b1134e0b2a186d19d162 () {
   )
 }
 
-export function Box_4a76b8efa1c572b4b4fc1af2c2e29347 () {
-  const [addEvents, connectErrors] = useContext(EventLoopContext);
-
-
-  
-    const handleSubmit_8df258c6c30a877d8767b802f7ab6b08 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.handle_edge_deletion", {edge:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_8df258c6c30a877d8767b802f7ab6b08}>
-  <HStack>
-  <Select_fb32c2162724c1ab9ebb7c046aef0485/>
-  <Button type={`submit`}>
-  {`Delete edge`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Select_1a7522c34fb13e88d1f14d71e93a64d2 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-
-  return (
-    <Select name={`successor`} placeholder={`Select successor node.`} size={`xs`}>
-  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
-  )
-}
-
-export function Select_fb32c2162724c1ab9ebb7c046aef0485 () {
+export function Select_73bfe285e44f647ad54cfe717cbd53e8 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
@@ -130,23 +124,45 @@ export function Select_fb32c2162724c1ab9ebb7c046aef0485 () {
   )
 }
 
-export function Select_46eed37486c35ddbec67537c9e402cd5 () {
+export function Grid_ce4746415b41eeb5905e93eb00c8fc85 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
 
   return (
-    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
-  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
-  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
-  {item}
-</option>
-))}
-</Select>
+    <DataTableGrid columns={state__cpm_site.cpm_dataframe.columns} data={state__cpm_site.cpm_dataframe.data} pagination={true} search={true}/>
   )
 }
 
-export function Box_c50019fa2b378944aceb32288d9161da () {
+export function Button_8ba5ea546b1f02ee752567033e6d0587 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+  const on_click_289cc6c8a36f7ede63249de0b5de4b20 = useCallback((_e) => addEvents([Event("state.cpm_site.submit_input", {})], (_e), {}), [addEvents, Event])
+
+
+  return (
+    <Button onClick={on_click_289cc6c8a36f7ede63249de0b5de4b20} type={`submit`}>
+  {`Confirm Input`}
+</Button>
+  )
+}
+
+export function Hstack_84a9c39c59adfdb98326bd425bc36583 () {
+  const state = useContext(StateContexts.state)
+
+
+
+  return (
+    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
+  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
+  <Text>
+  {`PERT`}
+</Text>
+</HStack>
+  )
+}
+
+export function Box_a1ccf330e4c40ef9cc49d0aa61576486 () {
   const [addEvents, connectErrors] = useContext(EventLoopContext);
 
 
@@ -167,8 +183,8 @@ export function Box_c50019fa2b378944aceb32288d9161da () {
   return (
     <Box as={`form`} onSubmit={handleSubmit_1818a70fbaa179d36f70fe9b441ed50f}>
   <HStack>
-  <Select_b77fe2dca6a1b034c995196143659dc4/>
-  <Select_1a7522c34fb13e88d1f14d71e93a64d2/>
+  <Select_4d9f512ad39b2c493c981c3a026b9d9f/>
+  <Select_9ca0d3fc50aa295b994ab7776edfec20/>
   <Button type={`submit`}>
   {`Add edge`}
 </Button>
@@ -177,74 +193,19 @@ export function Box_c50019fa2b378944aceb32288d9161da () {
   )
 }
 
-export function Select_b77fe2dca6a1b034c995196143659dc4 () {
+export function Select_32c13c7b76e63786b3695052c71d1644 () {
   const state__cpm_site = useContext(StateContexts.state__cpm_site)
 
 
 
   return (
-    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
+    <Select name={`node_del`} placeholder={`Select node to delete.`} size={`xs`}>
   {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
   <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
   {item}
 </option>
 ))}
 </Select>
-  )
-}
-
-export function Textarea_3b8a5f2d57cd65201cb1c81a73180032 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-
-  return (
-    <Textarea isReadOnly={true} value={state__cpm_site.cpm_json}/>
-  )
-}
-
-export function Box_77930b80b2346cc5c76c1c9984d17df6 () {
-  const [addEvents, connectErrors] = useContext(EventLoopContext);
-
-
-  
-    const handleSubmit_059747424201efbbbb366a919e010fe5 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.handle_node_deletion", {node:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_059747424201efbbbb366a919e010fe5}>
-  <HStack>
-  <Select_46eed37486c35ddbec67537c9e402cd5/>
-  <Button type={`submit`}>
-  {`Delete node`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-export function Hstack_84a9c39c59adfdb98326bd425bc36583 () {
-  const state = useContext(StateContexts.state)
-
-
-
-  return (
-    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/pert")) || ((((state.router.page.path) === ("/")) && ("PERT")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
-  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
-  <Text>
-  {`PERT`}
-</Text>
-</HStack>
   )
 }
 
@@ -266,6 +227,117 @@ export function Fragment_3ea1a0318ded176a3888f943242093c6 () {
   )
 }
 
+export function Select_9ca0d3fc50aa295b994ab7776edfec20 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Select name={`successor`} placeholder={`Select successor node.`} size={`xs`}>
+  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Hstack_c79ea6062abcf717b3bd6cad03600478 () {
+  const state = useContext(StateContexts.state)
+
+
+
+  return (
+    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
+  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
+  <Text>
+  {`CPM`}
+</Text>
+</HStack>
+  )
+}
+
+export function Textarea_3b8a5f2d57cd65201cb1c81a73180032 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Textarea isReadOnly={true} value={state__cpm_site.cpm_json}/>
+  )
+}
+
+export function Select_4d9f512ad39b2c493c981c3a026b9d9f () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Select name={`predecessor`} placeholder={`Select predecessor node.`} size={`xs`}>
+  {state__cpm_site.nodes_list.map((item, index_05754def86711a0e82b997b1b77b3df2) => (
+  <option key={index_05754def86711a0e82b997b1b77b3df2} value={item}>
+  {item}
+</option>
+))}
+</Select>
+  )
+}
+
+export function Box_2bb6bb83840cad8065d635170fe55964 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_8df258c6c30a877d8767b802f7ab6b08 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.handle_edge_deletion", {edge:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_8df258c6c30a877d8767b802f7ab6b08}>
+  <HStack>
+  <Select_73bfe285e44f647ad54cfe717cbd53e8/>
+  <Button type={`submit`}>
+  {`Delete edge`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Editable_c6e44ada01aaf3859b128b489ae87c86 () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+  const on_change_b4667367be6fc0e95ddabba8e72ddf90 = useCallback((_e0) => addEvents([Event("state.cpm_site.set_input_json", {input_json:_e0})], (_e0), {}), [addEvents, Event])
+
+
+  return (
+    <Editable onChange={on_change_b4667367be6fc0e95ddabba8e72ddf90} placeholder={`Paste your graph here...`} sx={{"width": "100%"}}>
+  <EditablePreview/>
+  <EditableTextarea/>
+</Editable>
+  )
+}
+
+export function Plot_10a47ad0e2b2dc63eb1fc78c51e4cae1 () {
+  const state__cpm_site = useContext(StateContexts.state__cpm_site)
+
+
+
+  return (
+    <Plot data={state__cpm_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
+  )
+}
+
 export function Hstack_08d061ff7d68b9dc0044e5bcedc5be88 () {
   const state = useContext(StateContexts.state)
 
@@ -281,7 +353,37 @@ export function Hstack_08d061ff7d68b9dc0044e5bcedc5be88 () {
   )
 }
 
-export function Box_fd9129b27c8240bc6e13c376e585a12a () {
+export function Box_04869af1b1364982a46eb36850e03bbb () {
+  const [addEvents, connectErrors] = useContext(EventLoopContext);
+
+
+  
+    const handleSubmit_059747424201efbbbb366a919e010fe5 = useCallback((ev) => {
+        const $form = ev.target
+        ev.preventDefault()
+        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
+
+        addEvents([Event("state.cpm_site.handle_node_deletion", {node:form_data})])
+
+        if (true) {
+            $form.reset()
+        }
+    })
+    
+
+  return (
+    <Box as={`form`} onSubmit={handleSubmit_059747424201efbbbb366a919e010fe5}>
+  <HStack>
+  <Select_32c13c7b76e63786b3695052c71d1644/>
+  <Button type={`submit`}>
+  {`Delete node`}
+</Button>
+</HStack>
+</Box>
+  )
+}
+
+export function Box_7d1e5d876a9b7b2c92b4012887db22a6 () {
   const [addEvents, connectErrors] = useContext(EventLoopContext);
 
 
@@ -301,110 +403,8 @@ export function Box_fd9129b27c8240bc6e13c376e585a12a () {
 
   return (
     <Box as={`form`} onSubmit={handleSubmit_83fb8c857df5a808cca0f18c637ff25a}>
-  <Vstack_68538e993aceba180eebe9f5c7fcebc6/>
+  <Vstack_0f0a4090fd218c228a1abf85551ed2b8/>
 </Box>
-  )
-}
-
-export function Button_8ba5ea546b1f02ee752567033e6d0587 () {
-  const [addEvents, connectErrors] = useContext(EventLoopContext);
-
-  const on_click_289cc6c8a36f7ede63249de0b5de4b20 = useCallback((_e) => addEvents([Event("state.cpm_site.submit_input", {})], (_e), {}), [addEvents, Event])
-
-
-  return (
-    <Button onClick={on_click_289cc6c8a36f7ede63249de0b5de4b20} type={`submit`}>
-  {`Confirm Input`}
-</Button>
-  )
-}
-
-export function Plot_10a47ad0e2b2dc63eb1fc78c51e4cae1 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-
-  return (
-    <Plot data={state__cpm_site.cpm_plotly} layout={{"showlegend": false, "hovermode": "closest", "margin": {"b": 20, "l": 5, "r": 5, "t": 40}, "xaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}, "yaxis": {"showgrid": false, "zeroline": false, "showticklabels": false}}}/>
-  )
-}
-
-export function Grid_ce4746415b41eeb5905e93eb00c8fc85 () {
-  const state__cpm_site = useContext(StateContexts.state__cpm_site)
-
-
-
-  return (
-    <DataTableGrid columns={state__cpm_site.cpm_dataframe.columns} data={state__cpm_site.cpm_dataframe.data} pagination={true} search={true}/>
-  )
-}
-
-export function Editable_c6e44ada01aaf3859b128b489ae87c86 () {
-  const [addEvents, connectErrors] = useContext(EventLoopContext);
-
-  const on_change_b4667367be6fc0e95ddabba8e72ddf90 = useCallback((_e0) => addEvents([Event("state.cpm_site.set_input_json", {input_json:_e0})], (_e0), {}), [addEvents, Event])
-
-
-  return (
-    <Editable onChange={on_change_b4667367be6fc0e95ddabba8e72ddf90} placeholder={`Paste your graph here...`} sx={{"width": "100%"}}>
-  <EditablePreview/>
-  <EditableTextarea/>
-</Editable>
-  )
-}
-
-export function Box_e5eae12f273f40a3a69835904faef78d () {
-  const [addEvents, connectErrors] = useContext(EventLoopContext);
-
-
-  
-    const handleSubmit_010fdf79b390b258c7d636c7691532d0 = useCallback((ev) => {
-        const $form = ev.target
-        ev.preventDefault()
-        const form_data = {...Object.fromEntries(new FormData($form).entries()), ...{}}
-
-        addEvents([Event("state.cpm_site.add_node_field", {new_nodes:form_data})])
-
-        if (true) {
-            $form.reset()
-        }
-    })
-    
-
-  return (
-    <Box as={`form`} onSubmit={handleSubmit_010fdf79b390b258c7d636c7691532d0}>
-  <HStack>
-  <Input name={`new_field`} placeholder={`Add node name`}/>
-  <Button type={`submit`}>
-  {`+`}
-</Button>
-</HStack>
-</Box>
-  )
-}
-
-const pulse = keyframes`
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-`
-
-
-export function Hstack_c79ea6062abcf717b3bd6cad03600478 () {
-  const state = useContext(StateContexts.state)
-
-
-
-  return (
-    <HStack sx={{"background": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#F5EFFE` : `transparent`, "color": isTrue((((state.router.page.path) === ("/cpm")) || ((((state.router.page.path) === ("/")) && ("CPM")) === ("Home")))) ? `#1A1060` : `black`, "borderRadius": "0.375rem", "boxShadow": "0px 0px 0px 1px rgba(84, 82, 95, 0.14)", "width": "100%", "paddingInlineStart": "1em", "paddingInlineEnd": "1em"}}>
-  <ChakraImage src={`/github.svg`} sx={{"height": "2.5em", "padding": "0.5em"}}/>
-  <Text>
-  {`CPM`}
-</Text>
-</HStack>
   )
 }
 
@@ -471,7 +471,7 @@ export default function Component() {
 </Heading>
   <Box_e5eae12f273f40a3a69835904faef78d/>
   <Divider/>
-  <Box_fd9129b27c8240bc6e13c376e585a12a/>
+  <Box_7d1e5d876a9b7b2c92b4012887db22a6/>
 </VStack>
 </VStack>
 </Box>
@@ -481,7 +481,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge creation`}
 </Heading>
-  <Box_c50019fa2b378944aceb32288d9161da/>
+  <Box_a1ccf330e4c40ef9cc49d0aa61576486/>
 </VStack>
 </Box>
 </HStack>
@@ -492,7 +492,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Node deletion`}
 </Heading>
-  <Box_77930b80b2346cc5c76c1c9984d17df6/>
+  <Box_04869af1b1364982a46eb36850e03bbb/>
 </VStack>
 </Box>
   <Box sx={{"width": "10%"}}/>
@@ -501,7 +501,7 @@ export default function Component() {
   <Heading size={`md`}>
   {`Edge deletion`}
 </Heading>
-  <Box_4a76b8efa1c572b4b4fc1af2c2e29347/>
+  <Box_2bb6bb83840cad8065d635170fe55964/>
 </VStack>
 </Box>
 </HStack>
