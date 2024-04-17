@@ -5,3 +5,4 @@ pyvis==0.3.2
 reflex==0.3.9
 statsmodels==0.14.1
 wheel==0.42.0
+netgraph==4.13.2
