@@ -1,14 +1,12 @@
 import json
 
+import matplotlib
 import networkx as nx
 import pandas as pd
-import plotly.graph_objects as go
 import reflex as rx
-import matplotlib
-from matplotlib import pyplot as plt
 from PIL import Image
-
-from inzynierka.pages.addEdge import addEdge
+from matplotlib import pyplot as plt
+from netgraph import Graph as gdraw
 
 nodeColor = 'Blue'
 nodeSize = 20
@@ -105,9 +103,9 @@ class CPM_graph(rx.Base):
         G.remove_edge(predecessor, successor)
         self.set_data_from_graph(G)
 
-    def add_edge(self, task_predecessor, task_successor):
+    def add_edge(self, task_predecessor, task_successor, edge_time):
         G = self.get_graph_from_data()
-        G.add_edge(task_predecessor, task_successor)
+        G.add_edge(task_predecessor, task_successor, time=edge_time)
         if not nx.is_directed_acyclic_graph(G):
             G.remove_edge(task_predecessor, task_successor)
         self.set_data_from_graph(G)
@@ -115,7 +113,6 @@ class CPM_graph(rx.Base):
     def get_nodes_list(self):
         G = self.get_graph_from_data()
         return list(G.nodes())
-
 
     def get_edges_list_string(self):
         G = self.get_graph_from_data()
@@ -145,19 +142,36 @@ class CPM_graph(rx.Base):
         df = pd.DataFrame.from_dict(dict(G.nodes(data=True)), orient='index')
         df.replace(True, 'X', inplace=True)
         df.reset_index(inplace=True)
-        df.rename(columns={'index': 'Node name'}, inplace=True)
+        df.rename(columns={'index': 'Node name', 'early_start': 'early start', 'late_start': 'late start',
+                           'slack_time': 'slack time'}, inplace=True)
         df = df.round(2)
-        return df[['Node name']]
+        return df[['Node name', 'early start', 'late start', 'slack time']]
         # return df[['Node name', 'task_time', 'early_start', 'slack_time']]
 
     def export_graph_img(self) -> Image:
         self.recalculate_graph()
         G = self.get_graph_from_data()
         pos = nx.planar_layout(G)
+        edge_labels = nx.get_edge_attributes(G, 'time')
 
         matplotlib.use('AGG')
-        fig, ax = plt.subplots()
-        nx.draw_networkx(G, pos=pos, ax=ax)
-        fig.tight_layout()
+        fig, ax = plt.subplots(figsize=(20, 20))
+        labels = dict()
+        sizes = dict()
+        edge_colors = dict()
+        early_starts = nx.get_node_attributes(G, 'early_start')
+        late_starts = nx.get_node_attributes(G, 'late_start')
+        slack_times = nx.get_node_attributes(G, 'slack_time')
+        for node in G.nodes:
+            labels[node] = (f"{node}, t⁰={early_starts[node]}"
+                            f"\n t¹={late_starts[node]}, L={slack_times[node]}")
+            sizes[node] = 5
+        for edge in G.edges:
+            edge_colors[edge] = 'tab:red' if G.edges[edge]['critical'] else 'tab:gray'
+
+        # nx.draw_networkx(G, pos=pos, ax=ax, labels=labels)
+        # nx.draw_networkx_edge_labels(G, pos, edge_labels)
+        gdraw(G, node_layout=pos, node_labels=labels, edge_labels=edge_labels, ax=ax, node_size=10, edge_size=sizes,
+              edge_label_fontdict=dict(size=15), edge_label_rotate=False, edge_color=edge_colors, arrows=True)
         fig.canvas.draw()
         return Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())

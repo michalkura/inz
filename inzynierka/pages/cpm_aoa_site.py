@@ -1,8 +1,7 @@
 import pandas as pd
-import plotly.graph_objects as go
 import reflex as rx
-
 from PIL import Image
+
 from inzynierka.pages.cpm_aoa_graph import CPM_graph
 from ..templates import template
 
@@ -22,9 +21,13 @@ class cpm_aoa_site(rx.State):
     def handle_edges_submit(self, new_edges: dict):
         predecessor = new_edges.get("predecessor")
         successor = new_edges.get("successor")
-        if not predecessor or not successor:
+        try:
+            edge_time = float(new_edges.get("edge_time"))
+        except ValueError:
+            edge_time = 0
+        if not predecessor or not successor or not edge_time:
             return
-        self.G.add_edge(predecessor, successor)
+        self.G.add_edge(predecessor, successor, edge_time)
 
     def handle_node_addition(self, node: dict):
         node_name = node.get("node_name")
@@ -69,74 +72,77 @@ class cpm_aoa_site(rx.State):
 
 @template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
 def graph():
-    return rx.chakra.vstack(
+    return rx.vstack(
         # plotly graph
         rx.image(src=cpm_aoa_site.cmp_image),
-        rx.chakra.divider(),
-        rx.chakra.hstack(
+        rx.divider(),
+        rx.hstack(
             # edges form
-            rx.chakra.box(
-                rx.chakra.vstack(
-                    rx.chakra.vstack(
-                        rx.chakra.heading("Node creation", size='md'),
-                        rx.chakra.form(
-                            rx.chakra.hstack(
-                                rx.chakra.input(placeholder="Add node name", name="node_name"),
-                                rx.chakra.button("Submit", type_="submit"),
+            rx.box(
+                rx.vstack(
+                    rx.vstack(
+                        rx.heading("Node creation", size='1'),
+                        rx.form(
+                            rx.hstack(
+                                rx.input(placeholder="Add node name", name="node_name", size='1'),
+                                rx.button("Submit", type="submit", size='1'),
                             ),
                             on_submit=cpm_aoa_site.handle_node_addition,
                             reset_on_submit=True,
                         ),
                     )
                 ),
-                width="45%"
+                width="25%"
             ),
-            rx.chakra.box(
-                width="10%"
+            rx.box(
+                width="5%"
             ),
             # edges form
             rx.chakra.box(
-                # rx.chakra.vstack(
-                #     rx.chakra.heading("Edge creation", size='md'),
-                #     rx.chakra.form(
-                #         rx.chakra.hstack(
-                #             rx.chakra.select(
-                #                 cpm_aoa_site.nodes_list, placeholder="Select predecessor node.", size="xs",
-                #                 name='predecessor'
-                #             ),
-                #             rx.chakra.select(
-                #                 cpm_aoa_site.nodes_list, placeholder="Select successor node.", size="xs",
-                #                 name='successor'
-                #             ),
-                #             rx.chakra.button(
-                #                 "Add edge", type_="submit"
-                #             )),
-                #         on_submit=cpm_aoa_site.handle_edges_submit,
-                #         reset_on_submit=True,
-                #
-                #     )
-                # ),
-                width="45%"
+                rx.vstack(
+                    rx.heading("Edge creation", size='1'),
+                    rx.form(
+                        rx.chakra.hstack(
+                            rx.select(
+                                cpm_aoa_site.nodes_list, placeholder="Select predecessor node.", size="1",
+                                name='predecessor'
+                            ),
+                            rx.select(
+                                cpm_aoa_site.nodes_list, placeholder="Select successor node.", size="1",
+                                name='successor'
+                            ),
+                            rx.input(
+                                placeholder="Enter edge time.", size="1",
+                                     name='edge_time'),
+                            rx.button(
+                                "Add edge", type="submit", size='1')
+                            ),
+                        on_submit=cpm_aoa_site.handle_edges_submit,
+                        reset_on_submit=True,
+
+                    )
+                ),
+                width="70%"
 
             ),
             width="100%",
             align_items='start'
         ),
-        rx.chakra.divider(),
+        rx.divider(),
 
-        rx.chakra.hstack(
+        rx.hstack(
             # node deletion
-            rx.chakra.box(
-                rx.chakra.vstack(
-                    rx.chakra.heading("Node deletion", size='md'),
-                    rx.chakra.form(
-                        rx.chakra.hstack(
-                            rx.chakra.select(
-                                cpm_aoa_site.nodes_list, placeholder="Select node to delete.", size="xs",
+            rx.box(
+                rx.vstack(
+                    rx.heading("Node deletion", size='1'),
+                    rx.form(
+                        rx.hstack(
+                            rx.select(
+                                cpm_aoa_site.nodes_list, placeholder="Select node to delete.", size="1",
                                 name='node_del'
                             ),
-                            rx.chakra.button(
-                                "Delete node", type_="submit"
+                            rx.button(
+                                "Delete node", type="submit"
                             )),
                         on_submit=cpm_aoa_site.handle_node_deletion,
                         reset_on_submit=True,
@@ -144,21 +150,21 @@ def graph():
                 ),
                 width='45%'
             ),
-            rx.chakra.box(
+            rx.box(
                 width='10%'
             ),
             # edge deletion
-            rx.chakra.box(
-                rx.chakra.vstack(
-                    rx.chakra.heading("Edge deletion", size='md'),
-                    rx.chakra.form(
-                        rx.chakra.hstack(
-                            rx.chakra.select(
-                                cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="xs",
+            rx.box(
+                rx.vstack(
+                    rx.heading("Edge deletion", size='1'),
+                    rx.form(
+                        rx.hstack(
+                            rx.select(
+                                cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="1",
                                 name='edge_del'
                             ),
-                            rx.chakra.button(
-                                "Delete edge", type_="submit"
+                            rx.button(
+                                "Delete edge", type="submit", size="1"
                             )),
                         on_submit=cpm_aoa_site.handle_edge_deletion,
                         reset_on_submit=True,
@@ -169,45 +175,45 @@ def graph():
             width='100%',
             align_items='start'
         ),
-        rx.chakra.divider(),
+        rx.divider(),
         # dataframe
         rx.data_table(
             data=cpm_aoa_site.cpm_dataframe,
             pagination=True,
             search=True,
         ),
-        rx.chakra.divider(),
+        rx.divider(),
         # graph io
-        rx.chakra.hstack(
-            # output
-            # rx.chakra.box(
-            #     rx.chakra.heading("Graph output", size='md'),
-            #     rx.chakra.text_area(
-            #         value=cpm_aoa_site.cpm_json,
-            #         is_read_only=True
-            #     ),
-            #     width='45%'
-            # ),
-            rx.chakra.box(
-                width='10%'
-            ),
-            # input
-            rx.chakra.box(
-                rx.chakra.heading("Graph input", size='md'),
-                rx.chakra.editable(
-                    rx.chakra.editable_preview(),
-                    rx.chakra.editable_textarea(),
-                    placeholder="Paste your graph here...",
-                    on_change=cpm_aoa_site.set_input_json,
-                    width="100%"
-                ),
-
-                rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
-
-                width='45%'
-            ),
-            width='100%',
-            align_items='start'
-        ),
+        # rx.hstack(
+        #     # output
+        #     rx.chakra.box(
+        #         rx.chakra.heading("Graph output", size='md'),
+        #         rx.chakra.text_area(
+        #             value=cpm_aoa_site.cpm_json,
+        #             is_read_only=True
+        #         ),
+        #         width='45%'
+        #     ),
+        #     rx.box(
+        #         width='10%'
+        #     ),
+        #     # input
+        #     rx.box(
+        #         rx.heading("Graph input", size='md'),
+        #         rx.chakra.editable(
+        #             rx.chakra.editable_preview(),
+        #             rx.chakra.editable_textarea(),
+        #             placeholder="Paste your graph here...",
+        #             on_change=cpm_aoa_site.set_input_json,
+        #             width="100%"
+        #         ),
+        #
+        #         rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
+        #
+        #         width='45%'
+        #     ),
+        #     width='100%',
+        #     align_items='start'
+        # ),
 
     )
