@@ -22,7 +22,7 @@ class cpm_aoa_site(rx.State):
         predecessor = new_edges.get("predecessor")
         successor = new_edges.get("successor")
         try:
-            edge_time = float(new_edges.get("edge_time"))
+            edge_time = int(new_edges.get("edge_time"))
         except ValueError:
             edge_time = 0
         if not predecessor or not successor or not edge_time:
@@ -69,6 +69,13 @@ class cpm_aoa_site(rx.State):
     def cmp_image(self) -> Image:
         return self.G.export_graph_img()
 
+    def download_graph(self):
+        self.G.export_csv_file()
+        return rx.download(url='/names.csv', filename="graph_edges.csv")
+
+    def reset_graph(self):
+        self.G.reset_graph()
+
 
 @template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
 def graph():
@@ -113,10 +120,10 @@ def graph():
                             ),
                             rx.input(
                                 placeholder="Enter edge time.", size="1",
-                                     name='edge_time'),
+                                name='edge_time'),
                             rx.button(
                                 "Add edge", type="submit", size='1')
-                            ),
+                        ),
                         on_submit=cpm_aoa_site.handle_edges_submit,
                         reset_on_submit=True,
 
@@ -184,36 +191,42 @@ def graph():
         ),
         rx.divider(),
         # graph io
-        # rx.hstack(
-        #     # output
-        #     rx.chakra.box(
-        #         rx.chakra.heading("Graph output", size='md'),
-        #         rx.chakra.text_area(
-        #             value=cpm_aoa_site.cpm_json,
-        #             is_read_only=True
-        #         ),
-        #         width='45%'
-        #     ),
-        #     rx.box(
-        #         width='10%'
-        #     ),
-        #     # input
-        #     rx.box(
-        #         rx.heading("Graph input", size='md'),
-        #         rx.chakra.editable(
-        #             rx.chakra.editable_preview(),
-        #             rx.chakra.editable_textarea(),
-        #             placeholder="Paste your graph here...",
-        #             on_change=cpm_aoa_site.set_input_json,
-        #             width="100%"
-        #         ),
-        #
-        #         rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
-        #
-        #         width='45%'
-        #     ),
-        #     width='100%',
-        #     align_items='start'
-        # ),
+        rx.hstack(
+            # output
+            rx.box(
+                rx.heading("Graph output", size='1'),
+                rx.button(
+                    "Download graph", on_click=cpm_aoa_site.download_graph
+                ),
+                width='20%'
+            ),
+            rx.box(
+                rx.heading("Reset Graph", size='1'),
+                rx.button(
+                    "Reset graph", on_click=cpm_aoa_site.reset_graph
+                ),
+                width='20%'
+            ),
+            rx.box(
+                width='15%'
+            ),
+            # input
+            # rx.box(
+            #     rx.heading("Graph input", size='md'),
+            #     rx.chakra.editable(
+            #         rx.chakra.editable_preview(),
+            #         rx.chakra.editable_textarea(),
+            #         placeholder="Paste your graph here...",
+            #         on_change=cpm_aoa_site.set_input_json,
+            #         width="100%"
+            #     ),
+            #
+            #     rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
+            #
+            #     width='45%'
+            # ),
+            width='100%',
+            align_items='start'
+        ),
 
     )

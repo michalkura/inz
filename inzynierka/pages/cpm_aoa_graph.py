@@ -1,4 +1,6 @@
+import csv
 import json
+import os
 
 import matplotlib
 import networkx as nx
@@ -36,7 +38,7 @@ class CPM_graph(rx.Base):
             nodes_data=nodes_data
         )
 
-    def set_nodes_data(self, nodes_data: dict[str, dict[str, int | float]]):
+    def set_nodes_data(self, nodes_data: list[tuple[str, dict[str, int | float]]]):
         self.nodes_data = nodes_data
 
     def set_edges_data(self, edges_data: list[tuple[str, str, dict[str, int | float]]]):
@@ -77,12 +79,12 @@ class CPM_graph(rx.Base):
             G.nodes[node]['slack_time'] = late_start - G.nodes[node]['early_start']
         self.set_data_from_graph(G)
 
-    def set_critical_edges(self):
-        G = self.get_graph_from_data()
-        for edge in G.edges:
-            G.edges[edge]['critical'] = (
-                    G.nodes[edge[1]]['early_start'] - G.nodes[edge[0]]['early_start'] == G.edges[edge]['time'])
-        self.set_data_from_graph(G)
+    # def set_critical_edges(self):
+    #     G = self.get_graph_from_data()
+    #     for edge in G.edges:
+    #         G.edges[edge]['critical'] = (
+    #                 G.nodes[edge[1]]['early_start'] - G.nodes[edge[0]]['early_start'] == G.edges[edge]['time'])
+    #     self.set_data_from_graph(G)
 
     def is_directed_acyclic_graph(self):
         G = self.get_graph_from_data()
@@ -121,7 +123,7 @@ class CPM_graph(rx.Base):
     def recalculate_graph(self):
         self.set_early_start_finish()
         self.set_late_start_finish()
-        self.set_critical_edges()
+        # self.set_critical_edges()
 
     def set_data_json(self, json_data: str):
         try:
@@ -155,7 +157,8 @@ class CPM_graph(rx.Base):
         edge_labels = nx.get_edge_attributes(G, 'time')
 
         matplotlib.use('AGG')
-        fig, ax = plt.subplots(figsize=(20, 20))
+        # fig, ax = plt.subplots(figsize=(16, 16))
+        fig, ax = plt.subplots()
         labels = dict()
         sizes = dict()
         edge_colors = dict()
@@ -163,15 +166,38 @@ class CPM_graph(rx.Base):
         late_starts = nx.get_node_attributes(G, 'late_start')
         slack_times = nx.get_node_attributes(G, 'slack_time')
         for node in G.nodes:
-            labels[node] = (f"{node}, t⁰={early_starts[node]}"
-                            f"\n t¹={late_starts[node]}, L={slack_times[node]}")
+            labels[node] = (f"{node}\n t⁰={early_starts[node]}"
+                            f"\n t¹={late_starts[node]}\n L={slack_times[node]}")
+            labels[node] = f"{node}"
             sizes[node] = 5
-        for edge in G.edges:
-            edge_colors[edge] = 'tab:red' if G.edges[edge]['critical'] else 'tab:gray'
-
-        # nx.draw_networkx(G, pos=pos, ax=ax, labels=labels)
-        # nx.draw_networkx_edge_labels(G, pos, edge_labels)
-        gdraw(G, node_layout=pos, node_labels=labels, edge_labels=edge_labels, ax=ax, node_size=10, edge_size=sizes,
-              edge_label_fontdict=dict(size=15), edge_label_rotate=False, edge_color=edge_colors, arrows=True)
+        # for edge in G.edges:
+        #     edge_colors[edge] = 'tab:red' if G.edges[edge]['critical'] else 'tab:gray'
+        #
+        longest_path = nx.dag_longest_path(G, weight="time")
+        critical_path = [(longest_path[i], longest_path[i+1]) for i in range(len(longest_path)-1)]
+        colors = ['red' if e in critical_path else 'black' for e in G.edges]
+        nx.draw_networkx(G, pos=pos, ax=ax, edge_color=colors)#, labels=labels)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels, rotate=False)
+        # gdraw(G, node_layout=pos, edge_labels=edge_labels, ax=ax,
+        #       # , node_labels=labels,edge_size=sizes, node_size=6,edge_label_fontdict=dict(size=8),
+        #       edge_label_rotate=False, edge_color=edge_colors, arrows=True)
         fig.canvas.draw()
-        return Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())
+        img = Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())
+        plt.close()
+        return img
+
+    def export_csv_file(self):
+        # csv_string = "predecessor;successor;time;\r\n"
+        # for edge in self.edges_data:
+        #     csv_string += f"{edge[0]};{edge[1]};{edge[2]['time']};{0xa}"
+        # return csv_string
+        with open('assets/names.csv', 'w', newline='') as csvfile:
+            fieldnames = ['predecessor', 'successor', 'time']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for edge in self.edges_data:
+                writer.writerow({'predecessor': edge[0], 'successor': edge[1], 'time': edge[2]['time']})
+
+    def reset_graph(self):
+        self.edges_data = []
+        self.set_nodes_data([('0', {})])
