@@ -1,3 +1,5 @@
+import csv
+
 import pandas as pd
 import reflex as rx
 from PIL import Image
@@ -62,8 +64,27 @@ class cpm_aoa_site(rx.State):
     def set_input_json(self, input_json: str):
         self.input_json = input_json
 
-    def submit_input(self):
-        self.G.set_data_json(self.input_json)
+    async def handle_upload(self, files: list[rx.UploadFile]):
+        H: CPM_graph = CPM_graph()
+        H.reset_graph()
+        H.remove_node('0')
+        for file in files:
+            upload_data = await file.read()
+            outfile = rx.get_upload_dir() / file.filename
+            # Save the file.
+            with outfile.open("wb") as file_object:
+                file_object.write(upload_data)
+
+            with outfile.open("r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    H.add_edge(row['predecessor'], row['successor'], int(row['time']))
+            if(H.is_directed_acyclic_graph()):
+                self.G = H
+
+    @staticmethod
+    def cancel_upload():
+        return rx.cancel_upload('my_upload')
 
     @rx.var
     def cmp_image(self) -> Image:
@@ -211,20 +232,26 @@ def graph():
                 width='15%'
             ),
             # input
-            # rx.box(
-            #     rx.heading("Graph input", size='md'),
-            #     rx.chakra.editable(
-            #         rx.chakra.editable_preview(),
-            #         rx.chakra.editable_textarea(),
-            #         placeholder="Paste your graph here...",
-            #         on_change=cpm_aoa_site.set_input_json,
-            #         width="100%"
-            #     ),
-            #
-            #     rx.chakra.button("Confirm Input", type_="submit", on_click=cpm_aoa_site.submit_input),
-            #
-            #     width='45%'
-            # ),
+            rx.box(
+                rx.heading("Graph input", size='1'),
+                rx.upload(
+                    rx.text(
+                        "Drag and drop files here or click to select files"
+                    ),
+                    id="my_upload",
+                    border="1px dotted rgb(107,99,246)",
+                    padding="5em",
+                    multiple=False,
+                    accept={"text/csv": [".csv"]},
+                    max_size=5000000,
+
+                ),
+
+                rx.button("Confirm file", on_click=cpm_aoa_site.handle_upload(rx.upload_files(upload_id="my_upload"))),
+                rx.button(on_click=cpm_aoa_site.cancel_upload),
+
+                width='45%'
+            ),
             width='100%',
             align_items='start'
         ),
