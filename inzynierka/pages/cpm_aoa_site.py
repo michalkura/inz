@@ -15,6 +15,8 @@ class cpm_aoa_site(rx.State):
     successor: str = ""
     node_to_delete: str = ""
     edge_to_delete: str = ""
+    selected_layout: str = "layer"
+    selected_layout_real: str = "layer"
 
     @rx.var
     def nodes_list(self) -> list[str]:
@@ -28,20 +30,29 @@ class cpm_aoa_site(rx.State):
         predecessor = self.predecessor
         successor = self.successor
         try:
-            edge_time = int(new_edges.get("edge_time"))
+            edge_time = float(new_edges.get("edge_time"))
         except ValueError:
             edge_time = 0
         if predecessor == "" or successor == "" or not edge_time:
             return rx.window_alert("Select predecessor and successor and task time")
-        self.G.add_edge(predecessor, successor, edge_time)
-        self.predecessor = ""
-        self.successor = ""
+        try:
+            self.G.add_edge(predecessor, successor, edge_time)
+            self.predecessor = ""
+            self.successor = ""
+        except:
+            return rx.window_alert("Try other layout first")
 
     def handle_node_addition(self, node: dict):
-        node_name = node.get("node_name")
+        node_name = str(node.get("node_name"))
+        if '->' in node_name:
+            return rx.window_alert("Node contains forbidden characters")
         if not node_name:
             return rx.window_alert("Enter node name first")
-        self.G.add_node(node_name)
+        try:
+            self.G.add_node(node_name)
+            self.G.export_graph_img()
+        except:
+            return rx.window_alert("Try other layout first")
 
     def handle_node_deletion(self, node: dict):
         node_to_del = self.node_to_delete
@@ -49,15 +60,24 @@ class cpm_aoa_site(rx.State):
             return rx.window_alert("Select node to delete first")
         if len(self.G.get_nodes_list()) == 1:
             return rx.window_alert("Graph has to have at least 1 node")
-        self.G.remove_node(node_to_del)
-        self.node_to_delete = ""
+        try:
+            self.G.remove_node(node_to_del)
+            self.node_to_delete = ""
+        except:
+            return rx.window_alert("Try other layout first")
 
     def handle_edge_deletion(self, edge: dict):
         edge_to_del = str(edge.get("edge_del")).split('->')
         if self.edge_to_delete == "":
             return rx.window_alert("Select edge to delete first")
-        self.G.remove_edge(edge_to_del[0], edge_to_del[1])
-        self.edge_to_delete = ""
+        try:
+            self.G.remove_edge(edge_to_del[0], edge_to_del[1])
+            self.G.export_graph_img(self.selected_layout)
+            self.edge_to_delete = ""
+        except:
+            self.selected_layout = "layer"
+            self.selected_layout_real = "layer"
+            return rx.window_alert("Nodes are not connected. Changed layout")
 
     @rx.var
     def cpm_dataframe(self) -> pd.DataFrame:
@@ -67,17 +87,11 @@ class cpm_aoa_site(rx.State):
         except KeyError:
             return pd.DataFrame()
 
-    # @rx.var
-    # def cpm_json(self) -> str:
-    #     return self.G.get_data_json()
-
-    def set_input_json(self, input_json: str):
-        self.input_json = input_json
-
     async def handle_upload(self, files: list[rx.UploadFile]):
         H: CPM_graph = CPM_graph()
         H.reset_graph()
         H.remove_node('0')
+        fieldnames = ['predecessor', 'successor', 'time']
         for file in files:
             upload_data = await file.read()
             outfile = rx.get_upload_dir() / file.filename
@@ -86,11 +100,18 @@ class cpm_aoa_site(rx.State):
                 file_object.write(upload_data)
 
             with outfile.open("r") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    H.add_edge(row['predecessor'], row['successor'], int(row['time']))
+                reader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=';')
+                try:
+                    for row in reader:
+                        H.add_edge(row['predecessor'], row['successor'], float(row['time']))
+                except KeyError:
+                    return rx.window_alert("Provided data is corrupted")
+                except TypeError as e:
+                    return rx.window_alert("Provided data is corrupted")
             if (H.is_directed_acyclic_graph()):
                 self.G = H
+            else:
+                return rx.window_alert("Provided Graph is not directed acyclic graph")
 
     @staticmethod
     def cancel_upload():
@@ -98,7 +119,7 @@ class cpm_aoa_site(rx.State):
 
     @rx.var
     def cmp_image(self) -> Image:
-        return self.G.export_graph_img()
+        return self.G.export_graph_img(self.selected_layout_real)
 
     def download_graph(self):
         self.G.export_csv_file()
@@ -106,6 +127,22 @@ class cpm_aoa_site(rx.State):
 
     def reset_graph(self):
         self.G.reset_graph()
+
+    def handle_layout_select(self, form_data: dict):
+        selected_layout = str(form_data['selected_layout'])
+        try:
+            self.G.export_graph_img(selected_layout)
+            self.selected_layout = selected_layout
+            self.selected_layout_real = selected_layout
+        except:
+            match selected_layout:
+                case "planar":
+                    return rx.window_alert("Graph is not planar")
+                case "graphviz":
+                    return rx.window_alert("graphviz not installed")
+                case "bfs_layout":
+                    return rx.window_alert("nodes are not connected")
+            return rx.window_alert("something went wrong")
 
 
 @template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
@@ -115,6 +152,26 @@ def graph():
         rx.image(src=cpm_aoa_site.cmp_image),
         rx.divider(),
         rx.hstack(
+            rx.box(
+                rx.heading("Layout selection", size='1'),
+                rx.form.root(
+                    rx.vstack(
+                        rx.select(
+                            ["layer", "planar", "graphviz", "bfs_layout", "random"],
+                            default_value="layer",
+                            value=cpm_aoa_site.selected_layout,
+                            on_change=cpm_aoa_site.set_selected_layout,
+                            name="selected_layout",
+                        ),
+                        rx.button("Submit layout", type="submit"),
+                        width="100%",
+                    ),
+                    on_submit=cpm_aoa_site.handle_layout_select,
+                    reset_on_submit=True,
+                    width="100%",
+                ),
+                width="20%"
+            ),
             # edges form
             rx.box(
                 rx.vstack(
@@ -181,7 +238,7 @@ def graph():
                         reset_on_submit=True,
                     ),
                 ),
-                width="70%"
+                width="50%",
 
             ),
             width="100%",
@@ -245,10 +302,6 @@ def graph():
                                 value=cpm_aoa_site.edge_to_delete,
                                 on_change=cpm_aoa_site.set_edge_to_delete,
                             ),
-                            # rx.select(
-                            #     cpm_aoa_site.edges_list, placeholder="Select edge to delete.", size="1",
-                            #     name='edge_del'
-                            # ),
                             rx.button(
                                 "Delete edge", type="submit", size="1"
                             )),
