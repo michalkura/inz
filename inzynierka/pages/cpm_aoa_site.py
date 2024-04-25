@@ -10,7 +10,6 @@ from ..templates import template
 
 class cpm_aoa_site(rx.State):
     G: CPM_graph = CPM_graph()
-    input_json: str
     predecessor: str = ""
     successor: str = ""
     node_to_delete: str = ""

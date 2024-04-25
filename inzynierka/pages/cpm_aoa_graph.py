@@ -16,10 +16,15 @@ class CPM_graph(rx.Base):
 
     def __init__(self):
         # self.load_graph_from_csv('data.csv')
-        edges_data = [('1', '2', {'time': 2}), (1, 3, {'time': 2}),
-                      ('2', '3', {'time': 2}), (2, 4, {'time': 3}),
-                      ('3', '4', {'time': 4}), (4, 5, {'time': 1})]
-        nodes_data = [(1, {}), (2, {}), (3, {}), (4, {}), (5, {})]
+        edges_data = [
+            ('1', '2', {'time': 2}),
+            ('1', '3', {'time': 2}),
+            ('2', '3', {'time': 2}),
+            ('2', '4', {'time': 3}),
+            ('3', '4', {'time': 4}),
+            ('4', '5', {'time': 1})
+        ]
+        nodes_data = [('1', {}), ('2', {}), ('3', {}), ('4', {}), ('5', {})]
 
         super().__init__(
             edges_data=edges_data,
@@ -33,8 +38,8 @@ class CPM_graph(rx.Base):
         self.edges_data = edges_data
 
     def set_data_from_graph(self, g: nx.DiGraph):
-        self.edges_data = nx.edges(g).data()
-        self.nodes_data = g.nodes(data=True)
+        self.edges_data = list(nx.edges(g).data())
+        self.nodes_data = list(g.nodes(data=True))
 
     def get_graph_from_data(self) -> nx.DiGraph:
         G = nx.DiGraph(self.edges_data)
@@ -99,15 +104,11 @@ class CPM_graph(rx.Base):
 
     def get_edges_list_string(self):
         G = self.get_graph_from_data()
-        return [str(edge[0]) + '->' + str(edge[1]) for edge in G.edges()]
+        return [str(edge[0]) + '->' + str(edge[1]) for edge in list(G.edges())]
 
     def recalculate_graph(self):
         self.set_early_start_finish()
         self.set_late_start_finish()
-
-    def get_node_attribute(self, attribute_name):
-        G = self.get_graph_from_data()
-        return nx.get_node_attributes(G, attribute_name, default=0)
 
     def get_pd_dataframe(self) -> pd.DataFrame:
         self.recalculate_graph()
@@ -149,7 +150,7 @@ class CPM_graph(rx.Base):
 
         longest_path = nx.dag_longest_path(G, weight="time")
         critical_path = [(longest_path[i], longest_path[i + 1]) for i in range(len(longest_path) - 1)]
-        colors = ['red' if e in critical_path else 'black' for e in G.edges]
+        colors = ['red' if e in critical_path else 'black' for e in list(G.edges)]
         nx.draw_networkx(G, pos=pos, ax=ax, edge_color=colors)
         nx.draw_networkx_edge_labels(G, pos, edge_labels, rotate=False)
         fig.canvas.draw()
