@@ -1,9 +1,0 @@
-taskName;taskTime;taskSuccessors
-start;0;a,b
-a;2;c
-b;5;c,d
-c;1;e
-d;6;e,f
-e;4;finish
-f;2;finish
-finish;0;
