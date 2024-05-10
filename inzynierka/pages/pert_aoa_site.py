@@ -162,7 +162,7 @@ def graph():
                 rx.form.root(
                     rx.vstack(
                         rx.select(
-                            ["layer", "planar", "graphviz", "bfs_layout", "random"],
+                            ["layer", "planar", "bfs_layout", "random"],#, "graphviz"
                             default_value="layer",
                             value=pert_aoa_site.selected_layout,
                             on_change=pert_aoa_site.set_selected_layout,

@@ -121,8 +121,9 @@ class cpm_aoa_site(rx.State):
         return self.G.export_graph_img(self.selected_layout_real)
 
     def download_graph(self):
-        self.G.export_csv_file()
-        return rx.download(url='/names.csv', filename="graph_edges.csv")
+        outfile = rx.get_upload_dir() / "graph_edges.csv"
+        self.G.export_csv_file(outfile)
+        return rx.download(url=rx.get_upload_url("graph_edges.csv"), filename="graph_edges.csv")
 
     def reset_graph(self):
         self.G.reset_graph()
@@ -144,7 +145,7 @@ class cpm_aoa_site(rx.State):
             return rx.window_alert("something went wrong")
 
 
-@template(route="/cpm_AoA", title="CPM AoA", image="/github.svg")
+@template(route="/", title="CPM AoA", image="/github.svg")
 def graph():
     return rx.vstack(
         # plotly graph
@@ -156,7 +157,7 @@ def graph():
                 rx.form.root(
                     rx.vstack(
                         rx.select(
-                            ["layer", "planar", "graphviz", "bfs_layout", "random"],
+                            ["layer", "planar", "bfs_layout", "random"],#, "graphviz"
                             default_value="layer",
                             value=cpm_aoa_site.selected_layout,
                             on_change=cpm_aoa_site.set_selected_layout,

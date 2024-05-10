@@ -1,6 +1,4 @@
 import csv
-import json
-import os
 
 import matplotlib
 import networkx as nx
@@ -52,8 +50,8 @@ class PERT_graph(rx.Base):
         self.edges_data = edges_data
 
     def set_data_from_graph(self, g: nx.DiGraph):
-        self.edges_data = nx.edges(g).data()
-        self.nodes_data = g.nodes(data=True)
+        self.set_edges_data(list(nx.edges(g).data()))
+        self.set_nodes_data(list(g.nodes(data=True)))
         self.set_task_times()
 
     def get_graph_from_data(self) -> nx.DiGraph:
@@ -153,9 +151,9 @@ class PERT_graph(rx.Base):
             case "planar":
                 pos = nx.planar_layout(G)
                 # graph is not planar
-            case "graphviz":
-                pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-                # graphviz not installed
+            # case "graphviz":
+            #     pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
+            #     # graphviz not installed
             case "bfs_layout":
                 pos = nx.bfs_layout(G, start=list(nx.topological_sort(G))[0])
                 # nodes are not connected

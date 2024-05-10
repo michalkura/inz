@@ -1,6 +1,4 @@
 import csv
-import json
-import os
 
 import matplotlib
 import networkx as nx
@@ -19,10 +17,14 @@ class CPM_graph(rx.Base):
         edges_data = [
             ('1', '2', {'time': 2}),
             ('1', '3', {'time': 2}),
-            ('2', '3', {'time': 2}),
-            ('2', '4', {'time': 3}),
-            ('3', '4', {'time': 4}),
-            ('4', '5', {'time': 1})
+            ('2', '4', {'time': 2}),
+            ('3', '4', {'time': 3}),
+            ('3', '5', {'time': 4}),
+            ('4', '6', {'time': 1}),
+            ('5', '6', {'time': 2}),
+            ('5', '7', {'time': 3}),
+            ('6', '8', {'time': 1}),
+            ('7', '8', {'time': 3}),
         ]
         nodes_data = [('1', {}), ('2', {}), ('3', {}), ('4', {}), ('5', {})]
 
@@ -38,8 +40,8 @@ class CPM_graph(rx.Base):
         self.edges_data = edges_data
 
     def set_data_from_graph(self, g: nx.DiGraph):
-        self.edges_data = list(nx.edges(g).data())
-        self.nodes_data = list(g.nodes(data=True))
+        self.set_edges_data(list(nx.edges(g).data()))
+        self.set_nodes_data(list(g.nodes(data=True)))
 
     def get_graph_from_data(self) -> nx.DiGraph:
         G = nx.DiGraph(self.edges_data)
@@ -78,7 +80,7 @@ class CPM_graph(rx.Base):
 
     def add_node(self, task_name):
         G = self.get_graph_from_data()
-        G.add_node(task_name)
+        G.add_node(task_name, dummy="test")
         self.set_data_from_graph(G)
 
     def remove_node(self, task_name):
@@ -132,9 +134,9 @@ class CPM_graph(rx.Base):
             case "planar":
                 pos = nx.planar_layout(G)
                 #graph is not planar
-            case "graphviz":
-                pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-                #graphviz not installed
+            # case "graphviz":
+            #     pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
+            #     #graphviz not installed
             case "bfs_layout":
                 pos = nx.bfs_layout(G, start=list(nx.topological_sort(G))[0])
                 #nodes are not connected
@@ -169,8 +171,8 @@ class CPM_graph(rx.Base):
         # Compute the multipartite_layout using the "layer" node attribute
         return nx.multipartite_layout(G, subset_key="layer")
 
-    def export_csv_file(self):
-        with open('assets/names.csv', 'w', newline='') as csvfile:
+    def export_csv_file(self, outfile):
+        with outfile.open('w', newline='') as csvfile:
             fieldnames = ['predecessor', 'successor', 'time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
