@@ -151,9 +151,9 @@ class PERT_graph(rx.Base):
             case "planar":
                 pos = nx.planar_layout(G)
                 # graph is not planar
-            # case "graphviz":
-            #     pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-            #     # graphviz not installed
+            case "graphviz":
+                pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
+                # graphviz not installed
             case "bfs_layout":
                 pos = nx.bfs_layout(G, start=list(nx.topological_sort(G))[0])
                 # nodes are not connected

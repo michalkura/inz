@@ -26,6 +26,10 @@ class pert_aoa_site(rx.State):
     def edges_list(self) -> list[str]:
         return self.G.get_edges_list_string()
 
+    def set_default_layout(self) -> None:
+        self.selected_layout_real = "layer"
+        self.selected_layout = "layer"
+
     def handle_edges_submit(self, new_edges: dict):
         predecessor = self.predecessor
         successor = self.successor
@@ -39,12 +43,11 @@ class pert_aoa_site(rx.State):
             pessimistic_time = 0
         if predecessor == "" or successor == "" or not most_likely_time or not optimistic_time or not pessimistic_time:
             return rx.window_alert("Select predecessor and successor and task time")
-        try:
-            self.G.add_edge(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time)
-            self.predecessor = ""
-            self.successor = ""
-        except:
-            return rx.window_alert("Try other layout first")
+
+        self.set_default_layout()
+        self.G.add_edge(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time)
+        self.predecessor = ""
+        self.successor = ""
 
     def handle_node_addition(self, node: dict):
         node_name = str(node.get("node_name"))
@@ -52,11 +55,9 @@ class pert_aoa_site(rx.State):
             return rx.window_alert("Node contains forbidden characters")
         if not node_name:
             return rx.window_alert("Enter node name first")
-        try:
-            self.G.add_node(node_name)
-            self.G.export_graph_img()
-        except:
-            return rx.window_alert("Try other layout first")
+
+        self.set_default_layout()
+        self.G.add_node(node_name)
 
     def handle_node_deletion(self, node: dict):
         node_to_del = self.node_to_delete
@@ -64,24 +65,19 @@ class pert_aoa_site(rx.State):
             return rx.window_alert("Select node to delete first")
         if len(self.G.get_nodes_list()) == 1:
             return rx.window_alert("Graph has to have at least 1 node")
-        try:
-            self.G.remove_node(node_to_del)
-            self.node_to_delete = ""
-        except:
-            return rx.window_alert("Try other layout first")
+
+        self.set_default_layout()
+        self.G.remove_node(node_to_del)
+        self.node_to_delete = ""
 
     def handle_edge_deletion(self, edge: dict):
         edge_to_del = str(edge.get("edge_del")).split("->")
         if self.edge_to_delete == "":
             return rx.window_alert("Select edge to delete first")
-        try:
-            self.G.remove_edge(edge_to_del[0], edge_to_del[1])
-            self.G.export_graph_img(self.selected_layout)
-            self.edge_to_delete = ""
-        except:
-            self.selected_layout = "layer"
-            self.selected_layout_real = "layer"
-            return rx.window_alert("Nodes are not connected. Changed layout")
+
+        self.set_default_layout()
+        self.G.remove_edge(edge_to_del[0], edge_to_del[1])
+        self.edge_to_delete = ""
 
     @rx.var
     def pert_dataframe(self) -> pd.DataFrame:
@@ -162,7 +158,7 @@ def graph():
                 rx.form.root(
                     rx.vstack(
                         rx.select(
-                            ["layer", "planar", "bfs_layout", "random"],#, "graphviz"
+                            ["layer", "planar", "graphviz", "bfs_layout", "random"],#
                             default_value="layer",
                             value=pert_aoa_site.selected_layout,
                             on_change=pert_aoa_site.set_selected_layout,
