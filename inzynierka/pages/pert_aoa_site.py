@@ -18,6 +18,7 @@ class pert_aoa_site(rx.State):
     edge_to_delete: str = ""
     selected_layout: str = "layer"
     selected_layout_real: str = "layer"
+    language_list: list[str] = ["PL", "EN"]
     translations: dict[str, dict[str, str]] = {
         "alert_edge_submit": {
             "PL": "Wybierz poprzednika, następnika i podaj czasy czynności",
@@ -81,7 +82,7 @@ class pert_aoa_site(rx.State):
         },
         "node_addition_placeholder": {
             "PL": "Nazwa zdarzenia",
-            "EN": "Node addition"
+            "EN": "Node name"
         },
         "edge_addition_title": {
             "PL": "Dodawanie czynności",
@@ -162,6 +163,10 @@ class pert_aoa_site(rx.State):
         "df_node_slack_time": {
             "PL": "Luz czasowy zdarzenia",
             "EN": "slack time"
+        },
+        "translation_title": {
+            "PL": "Język",
+            "EN": "Language"
         }
     }
 
@@ -504,6 +509,31 @@ def graph():
         rx.divider(),
         # graph io
         rx.hstack(
+            # translation
+            rx.box(
+                rx.vstack(
+                    rx.heading(pert_aoa_site.translations["translation_title"][pert_aoa_site.language], size='1'),
+                    rx.hstack(
+                        rx.select.root(
+                            rx.select.trigger(),
+                            rx.select.content(
+                                rx.select.group(
+                                    rx.foreach(
+                                        pert_aoa_site.language_list,
+                                        lambda x: rx.select.item(
+                                            x, value=x
+                                        ),
+                                    )
+                                ),
+                            ),
+                            value=pert_aoa_site.language,
+                            on_change=pert_aoa_site.set_language,
+                            size='1'
+                        )
+                    ),
+                    width="15%"
+                )
+            ),
             # output
             rx.box(
                 rx.heading(pert_aoa_site.translations["graph_output_title"][pert_aoa_site.language], size='1'),
@@ -523,9 +553,6 @@ def graph():
                 ),
                 width="20%"
             ),
-            rx.box(
-                width="15%"
-            ),
             # input
             rx.box(
                 rx.heading(pert_aoa_site.translations["graph_input_title"][pert_aoa_site.language], size='1'),
@@ -544,8 +571,10 @@ def graph():
                 ),
 
                 rx.button(pert_aoa_site.translations["submit"][pert_aoa_site.language],
-                          on_click=pert_aoa_site.handle_upload(rx.upload_files(upload_id="my_upload"))),
-                rx.button("Cancel", on_click=pert_aoa_site.cancel_upload),
+                          on_click=pert_aoa_site.handle_upload(rx.upload_files(upload_id="my_upload")),
+                          size='1'),
+                rx.button("Cancel", on_click=pert_aoa_site.cancel_upload,
+                          size='1'),
 
                 width="45%"
             ),

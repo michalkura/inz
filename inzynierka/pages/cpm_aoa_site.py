@@ -17,6 +17,7 @@ class cpm_aoa_site(rx.State):
     edge_to_delete: str = ""
     selected_layout: str = "layer"
     selected_layout_real: str = "layer"
+    language_list: list[str] = ["PL", "EN"]
     translations: dict[str, dict[str, str]] = {
         "alert_edge_submit": {
             "PL": "Wybierz poprzednika, następnika i podaj czas czynności",
@@ -80,7 +81,7 @@ class cpm_aoa_site(rx.State):
         },
         "node_addition_placeholder": {
             "PL": "Nazwa zdarzenia",
-            "EN": "Node addition"
+            "EN": "Node name"
         },
         "edge_addition_title": {
             "PL": "Dodawanie czynności",
@@ -153,6 +154,10 @@ class cpm_aoa_site(rx.State):
         "df_node_slack_time": {
             "PL": "Luz czasowy zdarzenia",
             "EN": "slack time"
+        },
+        "translation_title": {
+            "PL": "Język",
+            "EN": "Language"
         }
     }
 
@@ -486,6 +491,31 @@ def graph():
         rx.divider(),
         # graph io
         rx.hstack(
+            # translation
+            rx.box(
+                rx.vstack(
+                    rx.heading(cpm_aoa_site.translations["translation_title"][cpm_aoa_site.language], size='1'),
+                    rx.hstack(
+                        rx.select.root(
+                            rx.select.trigger(),
+                            rx.select.content(
+                                rx.select.group(
+                                    rx.foreach(
+                                        cpm_aoa_site.language_list,
+                                        lambda x: rx.select.item(
+                                            x, value=x
+                                        ),
+                                    )
+                                ),
+                            ),
+                            value=cpm_aoa_site.language,
+                            on_change=cpm_aoa_site.set_language,
+                            size='1'
+                        )
+                    ),
+                    width="15%"
+                )
+            ),
             # output
             rx.box(
                 rx.heading(cpm_aoa_site.translations["graph_output_title"][cpm_aoa_site.language], size='1'),
