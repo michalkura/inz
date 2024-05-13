@@ -118,11 +118,8 @@ class CPM_graph(rx.Base):
         df = pd.DataFrame.from_dict(dict(G.nodes(data=True)), orient='index')
         df.replace(True, 'X', inplace=True)
         df.reset_index(inplace=True)
-        df.rename(columns={'index': 'Node name', 'early_start': 'early start', 'late_start': 'late start',
-                           'slack_time': 'slack time'}, inplace=True)
         df = df.round(2)
-        return df[['Node name', 'early start', 'late start', 'slack time']]
-        # return df[['Node name', 'task_time', 'early_start', 'slack_time']]
+        return df
 
     def export_graph_img(self, layout="layer") -> Image:
         self.recalculate_graph()

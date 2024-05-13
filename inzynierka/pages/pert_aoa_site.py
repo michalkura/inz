@@ -10,6 +10,7 @@ from ..templates import template
 
 class pert_aoa_site(rx.State):
     G: PERT_graph = PERT_graph()
+    language: str = "PL"
     input_json: str
     predecessor: str = ""
     successor: str = ""
@@ -17,6 +18,152 @@ class pert_aoa_site(rx.State):
     edge_to_delete: str = ""
     selected_layout: str = "layer"
     selected_layout_real: str = "layer"
+    translations: dict[str, dict[str, str]] = {
+        "alert_edge_submit": {
+            "PL": "Wybierz poprzednika, następnika i podaj czasy czynności",
+            "EN": "Select predecessor and successor and task time"
+        },
+        "alert_node_addition_character": {
+            "PL": "Zdarzenie nie może zawierać znaku ->",
+            "EN": "Node contains forbidden characters: '->'"
+        },
+        "alert_node_addition_no_name": {
+            "PL": "Wprowadź najpierw nazwę zdarzenia",
+            "EN": "Enter node name first"
+        },
+        "alert_node_delete_no_name": {
+            "PL": "Wybierz najpierw zdarzenie do usunięcia",
+            "EN": "Select node to delete first"
+        },
+        "alert_node_delete_no_nodes": {
+            "PL": "Sieć musi mieć przynajmniej 1 zdarzenie",
+            "EN": "Graph has to have at least 1 node"
+        },
+        "alert_edge_delete_no_edge": {
+            "PL": "Wybierz najpierw czynność do usunięcia",
+            "EN": "Select edge to delete first"
+        },
+        "alert_graph_upload": {
+            "PL": "Wprowadzone dane są błędne",
+            "EN": "Provided data is corrupted"
+        },
+        "alert_not_DAG": {
+            "PL": "Wprowadzony graf nie jest acyklicznym grafem skierowanym",
+            "EN": "Provided Graph is not directed acyclic graph"
+        },
+        "alert_planar_graph": {
+            "PL": "Graf musi być planarny dla tego rozmieszczenia wierzchołków",
+            "EN": "Graph is not planar"
+        },
+        "alert_graphviz": {
+            "PL": "Biblioteka graphviz jest niezainstalowana",
+            "EN": "graphviz not installed"
+        },
+        "alert_bfs": {
+            "PL": "Zdarzenia muszą być połączone dla tego rozmieszczenia wierzchołków",
+            "EN": "nodes are not connected"
+        },
+        "alert_something_wrong": {
+            "PL": "Coś poszło nie tak",
+            "EN": "something went wrong"
+        },
+        "layout_selection_title": {
+            "PL": "Wybór rozmieszczenia wierzchołków",
+            "EN": "Layout selection"
+        },
+        "submit": {
+            "PL": "Zatwierdź",
+            "EN": "Submit"
+        },
+        "node_addition_title": {
+            "PL": "Dodawanie zdarzenia",
+            "EN": "Node addition"
+        },
+        "node_addition_placeholder": {
+            "PL": "Nazwa zdarzenia",
+            "EN": "Node addition"
+        },
+        "edge_addition_title": {
+            "PL": "Dodawanie czynności",
+            "EN": "Edge creation"
+        },
+        "edge_addition_predecessor_placeholder": {
+            "PL": "Wybierz poprzednika",
+            "EN": "Select predecessor node."
+        },
+        "edge_addition_successor_placeholder": {
+            "PL": "Wybierz następnika",
+            "EN": "Select successor node."
+        },
+        "edge_addition_time_placeholder": {
+            "PL": "Przewidywany czas",
+            "EN": "Most likely edge time."
+        },
+        "edge_addition_optimistic_time_placeholder": {
+            "PL": "Optymistyczny czas",
+            "EN": "Enter optimistic edge time."
+        },
+        "edge_addition_pessimistic_time_placeholder": {
+            "PL": "Pesymistyczny czas",
+            "EN": "Enter pessimistic edge time."
+        },
+        "node_deletion_title": {
+            "PL": "Usuwanie zdarzenia",
+            "EN": "Node deletion"
+        },
+        "node_deletion_placeholder": {
+            "PL": "Wybierz zdarzenie do usunięcia",
+            "EN": "Select node to delete"
+        },
+        "edge_deletion_title": {
+            "PL": "Usuwanie czynności",
+            "EN": "Edge deletion"
+        },
+        "edge_deletion_placeholder": {
+            "PL": "Wybierz czynność",
+            "EN": "Select edge to delete"
+        },
+        "graph_output_title": {
+            "PL": "Pobieranie sieci",
+            "EN": "Graph output"
+        },
+        "graph_output_button": {
+            "PL": "Pobierz sieć",
+            "EN": "Download graph"
+        },
+        "graph_reset_title": {
+            "PL": "Zresetuj sieć",
+            "EN": "Reset Graph"
+        },
+        "graph_reset_button": {
+            "PL": "Zresetuj sieć",
+            "EN": "Reset Graph"
+        },
+        "graph_input_title": {
+            "PL": "Wczytywanie sieci",
+            "EN": "Graph input"
+        },
+        "graph_input_placeholder": {
+            "PL": "Przesuń i upuść plik tutaj",
+            "EN": "Drag and drop files"
+        },
+        "df_node_name": {
+            "PL": "Nazwa zdarzenia",
+            "EN": "Node name"
+        },
+        "df_node_early_start": {
+            "PL": "NMT zdarzenia",
+            "EN": "early start"
+        },
+        "df_node_late_start": {
+            "PL": "NDT zdarzenia",
+            "EN": "late start"
+        },
+        "df_node_slack_time": {
+            "PL": "Luz czasowy zdarzenia",
+            "EN": "slack time"
+        }
+    }
 
     @rx.var
     def nodes_list(self) -> list[str]:
@@ -42,7 +189,7 @@ class pert_aoa_site(rx.State):
             optimistic_time = 0
             pessimistic_time = 0
         if predecessor == "" or successor == "" or not most_likely_time or not optimistic_time or not pessimistic_time:
-            return rx.window_alert("Select predecessor and successor and task time")
+            return rx.window_alert(self.translations["alert_edge_submit"][self.language])
 
         self.set_default_layout()
         self.G.add_edge(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time)
@@ -52,9 +199,9 @@ class pert_aoa_site(rx.State):
     def handle_node_addition(self, node: dict):
         node_name = str(node.get("node_name"))
         if "->" in node_name:
-            return rx.window_alert("Node contains forbidden characters")
+            return rx.window_alert(self.translations["alert_node_addition_character"][self.language])
         if not node_name:
-            return rx.window_alert("Enter node name first")
+            return rx.window_alert(self.translations["alert_node_addition_no_name"][self.language])
 
         self.set_default_layout()
         self.G.add_node(node_name)
@@ -62,9 +209,9 @@ class pert_aoa_site(rx.State):
     def handle_node_deletion(self, node: dict):
         node_to_del = self.node_to_delete
         if node_to_del == "":
-            return rx.window_alert("Select node to delete first")
+            return rx.window_alert(self.translations["alert_node_delete_no_name"][self.language])
         if len(self.G.get_nodes_list()) == 1:
-            return rx.window_alert("Graph has to have at least 1 node")
+            return rx.window_alert(self.translations["alert_node_delete_no_nodes"][self.language])
 
         self.set_default_layout()
         self.G.remove_node(node_to_del)
@@ -73,7 +220,7 @@ class pert_aoa_site(rx.State):
     def handle_edge_deletion(self, edge: dict):
         edge_to_del = str(edge.get("edge_del")).split("->")
         if self.edge_to_delete == "":
-            return rx.window_alert("Select edge to delete first")
+            return rx.window_alert(self.translations["alert_edge_delete_no_edge"][self.language])
 
         self.set_default_layout()
         self.G.remove_edge(edge_to_del[0], edge_to_del[1])
@@ -83,7 +230,18 @@ class pert_aoa_site(rx.State):
     def pert_dataframe(self) -> pd.DataFrame:
         df = self.G.get_pd_dataframe()
         try:
-            return df
+            df.rename(columns={
+                'index': self.translations["df_node_name"][self.language],
+                'early_start': self.translations["df_node_early_start"][self.language],
+                'late_start': self.translations["df_node_late_start"][self.language],
+                'slack_time': self.translations["df_node_slack_time"][self.language]
+            }, inplace=True)
+            return df[[
+                self.translations["df_node_name"][self.language],
+                self.translations["df_node_early_start"][self.language],
+                self.translations["df_node_late_start"][self.language],
+                self.translations["df_node_slack_time"][self.language]
+            ]]
         except KeyError:
             return pd.DataFrame()
 
@@ -106,13 +264,13 @@ class pert_aoa_site(rx.State):
                         H.add_edge(str(row["predecessor"]), str(row["successor"]), float(row["most_likely_time"]),
                                    float(row["optimistic_time"]), float(row["pessimistic_time"]))
                 except KeyError:
-                    return rx.window_alert("Provided data is corrupted")
+                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
                 except TypeError as e:
-                    return rx.window_alert("Provided data is corrupted")
+                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
             if H.is_directed_acyclic_graph():
                 self.G = H
             else:
-                return rx.window_alert("Provided Graph is not directed acyclic graph")
+                return rx.window_alert(self.translations["alert_not_DAG"][self.language])
 
     @staticmethod
     def cancel_upload():
@@ -138,12 +296,12 @@ class pert_aoa_site(rx.State):
         except:
             match selected_layout:
                 case "planar":
-                    return rx.window_alert("Graph is not planar")
+                    return rx.window_alert(self.translations["alert_planar_graph"][self.language])
                 case "graphviz":
-                    return rx.window_alert("graphviz not installed")
+                    return rx.window_alert(self.translations["alert_graphviz"][self.language])
                 case "bfs_layout":
-                    return rx.window_alert("nodes are not connected")
-            return rx.window_alert("something went wrong")
+                    return rx.window_alert(self.translations["alert_bfs"][self.language])
+            return rx.window_alert(self.translations["alert_something_wrong"][self.language])
 
 
 @template(route="/pert_AoA", title="PERT AoA", image="/github.svg")
@@ -154,18 +312,21 @@ def graph():
         rx.divider(),
         rx.hstack(
             rx.box(
-                rx.heading("Layout selection", size="1"),
+                rx.heading(pert_aoa_site.translations["layout_selection_title"][pert_aoa_site.language], size='1'),
                 rx.form.root(
                     rx.vstack(
-                        rx.select(
-                            ["layer", "planar", "graphviz", "bfs_layout", "random"],#
-                            default_value="layer",
-                            value=pert_aoa_site.selected_layout,
-                            on_change=pert_aoa_site.set_selected_layout,
-                            name="selected_layout",
+                        rx.hstack(
+                            rx.select(
+                                ["layer", "planar", "graphviz", "bfs_layout", "random"],  #
+                                default_value="layer",
+                                value=pert_aoa_site.selected_layout,
+                                on_change=pert_aoa_site.set_selected_layout,
+                                name="selected_layout",
+                                size='1',
+                            ),
+                            rx.button(pert_aoa_site.translations["submit"][pert_aoa_site.language],
+                                      type="submit", size='1'),
                         ),
-                        rx.button("Submit layout", type="submit"),
-                        width="100%",
                     ),
                     on_submit=pert_aoa_site.handle_layout_select,
                     reset_on_submit=True,
@@ -177,11 +338,13 @@ def graph():
             rx.box(
                 rx.vstack(
                     rx.vstack(
-                        rx.heading("Node creation", size="1"),
+                        rx.heading(pert_aoa_site.translations["node_addition_title"][pert_aoa_site.language], size='1'),
                         rx.form(
                             rx.hstack(
-                                rx.input(placeholder="Add node name", name="node_name", size="1"),
-                                rx.button("Submit", type="submit", size="1"),
+                                rx.input(placeholder=pert_aoa_site.translations["node_addition_placeholder"][
+                                    pert_aoa_site.language], name="node_name", size='1'),
+                                rx.button(pert_aoa_site.translations["submit"][pert_aoa_site.language], type="submit",
+                                          size='1'),
                             ),
                             on_submit=pert_aoa_site.handle_node_addition,
                             reset_on_submit=True,
@@ -196,11 +359,13 @@ def graph():
             # edges form
             rx.box(
                 rx.vstack(
-                    rx.heading("Edge creation", size="1"),
+                    rx.heading(pert_aoa_site.translations["edge_addition_title"][pert_aoa_site.language], size='1'),
                     rx.form(
                         rx.hstack(
                             rx.select.root(
-                                rx.select.trigger(placeholder="Select predecessor node."),
+                                rx.select.trigger(
+                                    placeholder=pert_aoa_site.translations["edge_addition_predecessor_placeholder"][
+                                        pert_aoa_site.language]),
                                 rx.select.content(
                                     rx.select.group(
                                         rx.foreach(
@@ -213,9 +378,12 @@ def graph():
                                 ),
                                 value=pert_aoa_site.predecessor,
                                 on_change=pert_aoa_site.set_predecessor,
+                                size='1'
                             ),
                             rx.select.root(
-                                rx.select.trigger(placeholder="Select successor node."),
+                                rx.select.trigger(
+                                    placeholder=pert_aoa_site.translations["edge_addition_successor_placeholder"][
+                                        pert_aoa_site.language]),
                                 rx.select.content(
                                     rx.select.group(
                                         rx.foreach(
@@ -228,18 +396,19 @@ def graph():
                                 ),
                                 value=pert_aoa_site.successor,
                                 on_change=pert_aoa_site.set_successor,
+                                size='1'
                             ),
                             rx.input(
-                                placeholder="Most likely time.", size="2",
-                                name="most_likely_time"),
+                                placeholder=pert_aoa_site.translations["edge_addition_time_placeholder"][
+                                    pert_aoa_site.language], size="1", name="most_likely_time"),
                             rx.input(
-                                placeholder="Optimistic time.", size="2",
-                                name="optimistic_time"),
+                                placeholder=pert_aoa_site.translations["edge_addition_optimistic_time_placeholder"][
+                                    pert_aoa_site.language], size="1", name="optimistic_time"),
                             rx.input(
-                                placeholder="Pessimistic time.", size="2",
-                                name="pessimistic_time"),
+                                placeholder=pert_aoa_site.translations["edge_addition_pessimistic_time_placeholder"][
+                                    pert_aoa_site.language], size="1", name="pessimistic_time"),
                             rx.button(
-                                "Add edge", type="submit", size="2")
+                                pert_aoa_site.translations["submit"][pert_aoa_site.language], type="submit", size='1')
                         ),
                         on_submit=pert_aoa_site.handle_edges_submit,
                         reset_on_submit=True,
@@ -257,11 +426,12 @@ def graph():
             # node deletion
             rx.box(
                 rx.vstack(
-                    rx.heading("Node deletion", size="1"),
+                    rx.heading(pert_aoa_site.translations["node_deletion_title"][pert_aoa_site.language], size='1'),
                     rx.form(
                         rx.hstack(
                             rx.select.root(
-                                rx.select.trigger(placeholder="Select node to delete."),
+                                rx.select.trigger(placeholder=pert_aoa_site.translations["node_deletion_placeholder"][
+                                    pert_aoa_site.language]),
                                 rx.select.content(
                                     rx.select.group(
                                         rx.foreach(
@@ -274,9 +444,10 @@ def graph():
                                 ),
                                 value=pert_aoa_site.node_to_delete,
                                 on_change=pert_aoa_site.set_node_to_delete,
+                                size='1'
                             ),
                             rx.button(
-                                "Delete node", type="submit"
+                                pert_aoa_site.translations["submit"][pert_aoa_site.language], type="submit", size='1'
                             )),
                         on_submit=pert_aoa_site.handle_node_deletion,
                         reset_on_submit=True,
@@ -290,11 +461,12 @@ def graph():
             # edge deletion
             rx.box(
                 rx.vstack(
-                    rx.heading("Edge deletion", size="1"),
+                    rx.heading(pert_aoa_site.translations["edge_deletion_title"][pert_aoa_site.language], size='1'),
                     rx.form(
                         rx.hstack(
                             rx.select.root(
-                                rx.select.trigger(placeholder="Select edge to delete."),
+                                rx.select.trigger(placeholder=pert_aoa_site.translations["edge_deletion_placeholder"][
+                                    pert_aoa_site.language], size='1'),
                                 rx.select.content(
                                     rx.select.group(
                                         rx.foreach(
@@ -308,9 +480,10 @@ def graph():
                                 name="edge_del",
                                 value=pert_aoa_site.edge_to_delete,
                                 on_change=pert_aoa_site.set_edge_to_delete,
+                                size='1'
                             ),
                             rx.button(
-                                "Delete edge", type="submit", size="1"
+                                pert_aoa_site.translations["submit"][pert_aoa_site.language], type="submit", size="1"
                             )),
                         on_submit=pert_aoa_site.handle_edge_deletion,
                         reset_on_submit=True,
@@ -333,16 +506,20 @@ def graph():
         rx.hstack(
             # output
             rx.box(
-                rx.heading("Graph output", size="1"),
+                rx.heading(pert_aoa_site.translations["graph_output_title"][pert_aoa_site.language], size='1'),
                 rx.button(
-                    "Download graph", on_click=pert_aoa_site.download_graph
+                    pert_aoa_site.translations["graph_output_button"][pert_aoa_site.language],
+                    on_click=pert_aoa_site.download_graph,
+                    size='1'
                 ),
                 width="20%"
             ),
             rx.box(
-                rx.heading("Reset Graph", size="1"),
+                rx.heading(pert_aoa_site.translations["graph_reset_title"][pert_aoa_site.language], size='1'),
                 rx.button(
-                    "Reset graph", on_click=pert_aoa_site.reset_graph
+                    pert_aoa_site.translations["graph_reset_button"][pert_aoa_site.language],
+                    on_click=pert_aoa_site.reset_graph,
+                    size='1'
                 ),
                 width="20%"
             ),
@@ -351,22 +528,24 @@ def graph():
             ),
             # input
             rx.box(
-                rx.heading("Graph input", size="1"),
+                rx.heading(pert_aoa_site.translations["graph_input_title"][pert_aoa_site.language], size='1'),
                 rx.upload(
                     rx.text(
-                        "Drag and drop files here or click to select files"
+                        pert_aoa_site.translations["graph_input_placeholder"][pert_aoa_site.language],
+                        size='1'
                     ),
                     id="my_upload",
                     border="1px dotted rgb(107,99,246)",
-                    padding="5em",
+                    padding="1em",
                     multiple=False,
                     accept={"text/csv": [".csv"]},
                     max_size=5000000,
 
                 ),
 
-                rx.button("Confirm file", on_click=pert_aoa_site.handle_upload(rx.upload_files(upload_id="my_upload"))),
-                rx.button("Cancel upload", on_click=pert_aoa_site.cancel_upload),
+                rx.button(pert_aoa_site.translations["submit"][pert_aoa_site.language],
+                          on_click=pert_aoa_site.handle_upload(rx.upload_files(upload_id="my_upload"))),
+                rx.button("Cancel", on_click=pert_aoa_site.cancel_upload),
 
                 width="45%"
             ),
