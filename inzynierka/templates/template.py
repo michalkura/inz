@@ -47,10 +47,10 @@ def menu_button() -> rx.Component:
                 ],
                 rx.chakra.menu_divider(),
                 rx.chakra.menu_item(
-                    rx.chakra.link("About", href="https://github.com/reflex-dev", width="100%")
+                    rx.chakra.link("About", href="https://github.com/michalkura", width="100%")
                 ),
                 rx.chakra.menu_item(
-                    rx.chakra.link("Contact", href="mailto:founders@=reflex.dev", width="100%")
+                    rx.chakra.link("Contact", href="mailto:michal.kurowski01@student.wat.edu.pl", width="100%")
                 ),
             ),
         ),
