@@ -130,13 +130,13 @@ class CPM_graph(rx.Base):
                 pos = self.get_layered_pos()
             case "planar":
                 pos = nx.planar_layout(G)
-                #graph is not planar
+                # graph is not planar
             case "graphviz":
                 pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-            #     #graphviz not installed
+                # graphviz not installed
             case "bfs_layout":
                 pos = nx.bfs_layout(G, start=list(nx.topological_sort(G))[0])
-                #nodes are not connected
+                # nodes are not connected
             case "random":
                 pos = nx.random_layout(G)
             case _:
@@ -168,14 +168,12 @@ class CPM_graph(rx.Base):
         # Compute the multipartite_layout using the "layer" node attribute
         return nx.multipartite_layout(G, subset_key="layer")
 
-    def export_csv_file(self, outfile):
-        with outfile.open('w', newline='') as csvfile:
-            fieldnames = ['predecessor', 'successor', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for edge in self.edges_data:
-                writer.writerow({'predecessor': edge[0], 'successor': edge[1], 'time': edge[2]['time']})
+    def export_csv_file(self):
+        csv_string = "predecessor,successor,time\r\n"
+        for edge in self.edges_data:
+            csv_string += f"{edge[0]},{edge[1]},{edge[2]['time']}\r\n"
+        return csv_string
 
     def reset_graph(self):
-        self.edges_data = []
+        self.set_edges_data([])
         self.set_nodes_data([('0', {})])

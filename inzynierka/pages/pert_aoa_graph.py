@@ -187,16 +187,12 @@ class PERT_graph(rx.Base):
         return nx.multipartite_layout(G, subset_key="layer")
 
     def export_csv_file(self):
-        with open("assets/names.csv", "w", newline="") as csvfile:
-            fieldnames = ["predecessor", "successor", "time"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for edge in self.edges_data:
-                writer.writerow(
-                    {"predecessor": edge[0], "successor": edge[1], "most_likely_time": edge[2]["most_likely_time"],
-                     "optimistic_time": edge[2]["optimistic_time"], "pessimistic_time": edge[2]["pessimistic_time"]})
+        csv_string = "predecessor,successor,most_likely_time,optimistic_time,pessimistic_time\r\n"
+        for edge in self.edges_data:
+            csv_string += (f"{edge[0]},{edge[1]},{edge[2]['most_likely_time']},{edge[2]['optimistic_time']},"
+                           + f"{edge[2]['pessimistic_time']}\r\n")
+        return csv_string
 
-    
     def reset_graph(self):
-        self.edges_data = []
+        self.set_edges_data([])
         self.set_nodes_data([("0", {})])

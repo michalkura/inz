@@ -4,6 +4,7 @@ import pandas as pd
 import reflex as rx
 from PIL import Image
 
+import urllib.parse
 from inzynierka.pages.pert_aoa_graph import PERT_graph
 from ..templates import template
 
@@ -167,6 +168,14 @@ class pert_aoa_site(rx.State):
         "translation_title": {
             "PL": "Język",
             "EN": "Language"
+        },
+        "alert_missing_fields": {
+            "PL": "W pliku CSV brakuje nagłówków ('predecessor', 'successor', 'most_likely_time', 'optimistic_time', 'pessimistic_time')",
+            "EN": "CSV is missing headers ('predecessor', 'successor', 'most_likely_time', 'optimistic_time', 'pessimistic_time')"
+        },
+        "alert_graph_upload_float": {
+            "PL": "Jedna z wartości 'most_likely_time', 'optimistic_time', 'pessimistic_time' nie moze byc przekonwertowana na float (separator dziesiętny to '.')",
+            "EN": "Value 'most_likely_time', 'optimistic_time', 'pessimistic_time' could not be converted to float"
         }
     }
 
@@ -254,24 +263,23 @@ class pert_aoa_site(rx.State):
         H: PERT_graph = PERT_graph()
         H.reset_graph()
         H.remove_node("0")
-        fieldnames = ["predecessor", "successor", "most_likely_time", "optimistic_time", "pessimistic_time"]
         for file in files:
             upload_data = await file.read()
-            outfile = rx.get_upload_dir() / file.filename
-            # Save the file.
-            with outfile.open("wb") as file_object:
-                file_object.write(upload_data)
-
-            with outfile.open("r") as csvfile:
-                reader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=";")
-                try:
-                    for row in reader:
-                        H.add_edge(str(row["predecessor"]), str(row["successor"]), float(row["most_likely_time"]),
-                                   float(row["optimistic_time"]), float(row["pessimistic_time"]))
-                except KeyError:
-                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
-                except TypeError as e:
-                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
+            csvfile = upload_data.decode('utf-8').splitlines()
+            reader = csv.DictReader(csvfile)
+            if any(x not in reader.fieldnames for x in ['predecessor', 'successor', 'most_likely_time',
+                                                        'optimistic_time', 'pessimistic_time']):
+                return rx.window_alert(self.translations["alert_missing_fields"][self.language])
+            try:
+                for row in reader:
+                    H.add_edge(str(row["predecessor"]), str(row["successor"]), float(row["most_likely_time"]),
+                               float(row["optimistic_time"]), float(row["pessimistic_time"]))
+            except KeyError:
+                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
+            except TypeError as e:
+                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
+            except ValueError as e:
+                return rx.window_alert(self.translations["alert_graph_upload_float"][self.language] + '\n' + str(e))
             if H.is_directed_acyclic_graph():
                 self.G = H
             else:
@@ -286,8 +294,9 @@ class pert_aoa_site(rx.State):
         return self.G.export_graph_img(self.selected_layout_real)
 
     def download_graph(self):
-        self.G.export_csv_file()
-        return rx.download(url="/names.csv", filename="graph_edges.csv")
+        csv_data = self.G.export_csv_file()
+        return rx.download(data=urllib.parse.quote(csv_data),
+                           filename="graph_edges.csv")
 
     def reset_graph(self):
         self.G.reset_graph()

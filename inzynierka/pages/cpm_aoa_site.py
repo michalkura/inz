@@ -1,4 +1,5 @@
 import csv
+import urllib.parse
 
 import pandas as pd
 import reflex as rx
@@ -158,6 +159,14 @@ class cpm_aoa_site(rx.State):
         "translation_title": {
             "PL": "Język",
             "EN": "Language"
+        },
+        "alert_missing_fields": {
+            "PL": "W pliku CSV brakuje nagłówków ('predecessor', 'successor', 'time')",
+            "EN": "CSV is missing headers ('predecessor', 'successor', 'time')"
+        },
+        "alert_graph_upload_float": {
+            "PL": "Wartość 'time' nie moze byc przekonwertowana na float (separator dziesiętny to '.')",
+            "EN": "Value 'time' could not be converted to float"
         }
     }
 
@@ -241,24 +250,22 @@ class cpm_aoa_site(rx.State):
         H: CPM_graph = CPM_graph()
         H.reset_graph()
         H.remove_node('0')
-        fieldnames = ['predecessor', 'successor', 'time']
         for file in files:
             upload_data = await file.read()
-            outfile = rx.get_upload_dir() / file.filename
-            # Save the file.
-            with outfile.open("wb") as file_object:
-                file_object.write(upload_data)
-
-            with outfile.open("r") as csvfile:
-                reader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=';')
-                try:
-                    for row in reader:
-                        H.add_edge(row['predecessor'], row['successor'], float(row['time']))
-                except KeyError:
-                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
-                except TypeError as e:
-                    return rx.window_alert(self.translations["alert_graph_upload"][self.language])
-            if (H.is_directed_acyclic_graph()):
+            csvfile = upload_data.decode('utf-8').splitlines()
+            reader = csv.DictReader(csvfile)
+            if any(x not in reader.fieldnames for x in ['predecessor', 'successor', 'time']):
+                return rx.window_alert(self.translations["alert_missing_fields"][self.language])
+            try:
+                for row in reader:
+                    H.add_edge(row['predecessor'], row['successor'], float(row['time']))
+            except KeyError:
+                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
+            except TypeError as e:
+                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
+            except ValueError as e:
+                return rx.window_alert(self.translations["alert_graph_upload_float"][self.language] + '\n' + str(e))
+            if H.is_directed_acyclic_graph():
                 self.G = H
             else:
                 return rx.window_alert(self.translations["alert_not_DAG"][self.language])
@@ -272,9 +279,9 @@ class cpm_aoa_site(rx.State):
         return self.G.export_graph_img(self.selected_layout_real)
 
     def download_graph(self):
-        outfile = rx.get_upload_dir() / "graph_edges.csv"
-        self.G.export_csv_file(outfile)
-        return rx.download(url=rx.get_upload_url("graph_edges.csv"), filename="graph_edges.csv")
+        csv_data = self.G.export_csv_file()
+        return rx.download(data=urllib.parse.quote(csv_data),
+                           filename="graph_edges.csv")
 
     def reset_graph(self):
         self.G.reset_graph()
