@@ -204,7 +204,7 @@ class PERT_graph(rx.Base):
         longest_path = nx.dag_longest_path(G, weight="time")
         critical_path = [(longest_path[i], longest_path[i + 1]) for i in range(len(longest_path) - 1)]
         colors = ["red" if e in critical_path else "black" for e in G.edges]
-        nx.draw_networkx(G, pos=pos, ax=ax, edge_color=colors)
+        nx.draw_networkx(G, pos=pos, ax=ax, edge_color=colors, node_color='orange')
         nx.draw_networkx_edge_labels(G, pos, edge_labels, rotate=False, font_size=14)
         fig.canvas.draw()
         img = Image.frombytes("RGB", fig.canvas.get_width_height(), fig.canvas.tostring_rgb())
