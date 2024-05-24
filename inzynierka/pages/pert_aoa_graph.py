@@ -90,6 +90,29 @@ class PERT_graph(rx.Base):
         G = self.get_graph_from_data()
         return nx.is_directed_acyclic_graph(G)
 
+    def is_node_addable(self, task_name, layout):
+        G = self.get_graph_from_data()
+        G.add_node(task_name)
+        return self.is_graph_drawable(layout=layout, G=G)
+
+    def is_edge_addable(self, predecessor, successor, most_likely_time, optimistic_time, pessimistic_time, layout):
+        G = self.get_graph_from_data()
+        G.add_edge(predecessor, successor, most_likely_time=most_likely_time, optimistic_time=optimistic_time,
+                   pessimistic_time=pessimistic_time)
+        if not nx.is_directed_acyclic_graph(G):
+            return False
+        return self.is_graph_drawable(layout=layout, G=G)
+
+    def is_node_deletable(self, task_name, layout):
+        G = self.get_graph_from_data()
+        G.remove_node(task_name)
+        return self.is_graph_drawable(layout=layout, G=G)
+
+    def is_edge_deletable(self, predecessor, successor, layout):
+        G = self.get_graph_from_data()
+        G.remove_edge(predecessor, successor)
+        return self.is_graph_drawable(layout=layout, G=G)
+
     def add_node(self, task_name):
         G = self.get_graph_from_data()
         G.add_node(task_name)
@@ -105,12 +128,12 @@ class PERT_graph(rx.Base):
         G.remove_edge(predecessor, successor)
         self.set_data_from_graph(G)
 
-    def add_edge(self, task_predecessor, task_successor, most_likely_time, optimistic_time, pessimistic_time):
+    def add_edge(self, predecessor, successor, most_likely_time, optimistic_time, pessimistic_time):
         G = self.get_graph_from_data()
-        G.add_edge(task_predecessor, task_successor, most_likely_time=most_likely_time, optimistic_time=optimistic_time,
+        G.add_edge(predecessor, successor, most_likely_time=most_likely_time, optimistic_time=optimistic_time,
                    pessimistic_time=pessimistic_time)
         if not nx.is_directed_acyclic_graph(G):
-            G.remove_edge(task_predecessor, task_successor)
+            G.remove_edge(predecessor, successor)
         self.set_data_from_graph(G)
 
     def get_nodes_list(self):
@@ -138,6 +161,19 @@ class PERT_graph(rx.Base):
         df = df.round(2)
         return df
 
+    def is_graph_drawable(self, layout: str, G: nx.DiGraph = None) -> bool:
+        if G is None:
+            self.recalculate_graph()
+            G = self.get_graph_from_data()
+
+        match layout:
+            case "planar":
+                return nx.is_planar(G)
+            case "bfs_layout":
+                start = list(nx.topological_sort(G))[0]
+                return list(G.nodes()) == list(nx.bfs_tree(G, start).nodes())
+        return True
+
     def export_graph_img(self, layout="layer") -> Image:
         self.recalculate_graph()
         G = self.get_graph_from_data()
@@ -148,9 +184,9 @@ class PERT_graph(rx.Base):
             case "planar":
                 pos = nx.planar_layout(G)
                 # graph is not planar
-            case "graphviz":
-                pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-                # graphviz not installed
+            # case "graphviz":
+            #     pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
+            #     # graphviz not installed
             case "bfs_layout":
                 pos = nx.bfs_layout(G, start=list(nx.topological_sort(G))[0])
                 # nodes are not connected

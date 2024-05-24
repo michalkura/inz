@@ -1,4 +1,5 @@
 import csv
+from io import StringIO
 
 import pandas as pd
 import reflex as rx
@@ -11,6 +12,9 @@ from ..templates import template
 
 class pert_aoa_site(rx.State):
     G: PERT_graph = PERT_graph()
+    most_likely_time: float = 0.0
+    optimistic_time: float = 0.0
+    pessimistic_time: float = 0.0
     language: str = "PL"
     input_json: str
     predecessor: str = ""
@@ -54,15 +58,15 @@ class pert_aoa_site(rx.State):
             "EN": "Provided Graph is not directed acyclic graph"
         },
         "alert_planar_graph": {
-            "PL": "Graf musi być planarny dla tego rozmieszczenia wierzchołków",
+            "PL": "Graf musi być planarny dla tego rozmieszczenia wierzchołków.\nZmieniono rozmieszczenie wierzchołków.",
             "EN": "Graph is not planar"
         },
         "alert_graphviz": {
-            "PL": "Biblioteka graphviz jest niezainstalowana",
+            "PL": "Biblioteka graphviz jest niezainstalowana.\nZmieniono rozmieszczenie wierzchołków.",
             "EN": "graphviz not installed"
         },
         "alert_bfs": {
-            "PL": "Zdarzenia muszą być połączone dla tego rozmieszczenia wierzchołków",
+            "PL": "Zdarzenia muszą być połączone dla tego rozmieszczenia wierzchołków.\nZmieniono rozmieszczenie wierzchołków.",
             "EN": "nodes are not connected"
         },
         "alert_something_wrong": {
@@ -174,8 +178,8 @@ class pert_aoa_site(rx.State):
             "EN": "CSV is missing headers ('predecessor', 'successor', 'most_likely_time', 'optimistic_time', 'pessimistic_time')"
         },
         "alert_graph_upload_float": {
-            "PL": "Jedna z wartości 'most_likely_time', 'optimistic_time', 'pessimistic_time' nie moze byc przekonwertowana na float (separator dziesiętny to '.')",
-            "EN": "Value 'most_likely_time', 'optimistic_time', 'pessimistic_time' could not be converted to float"
+            "PL": "Separator dziesiętny to '.'\nBłąd danych w kolumnie ",
+            "EN": "Value error in column "
         }
     }
 
@@ -191,21 +195,40 @@ class pert_aoa_site(rx.State):
         self.selected_layout_real = "layer"
         self.selected_layout = "layer"
 
+    def get_layout_error(self, layout: str):
+        match layout:
+            case "planar":
+                return rx.window_alert(self.translations["alert_planar_graph"][self.language])
+            case "graphviz":
+                return rx.window_alert(self.translations["alert_graphviz"][self.language])
+            case "bfs_layout":
+                return rx.window_alert(self.translations["alert_bfs"][self.language])
+            case _:
+                return rx.window_alert(self.translations["alert_something_wrong"][self.language])
+
+    def check_layout_error(self, layout: str = None):
+        if layout is None:
+            layout = self.selected_layout_real
+        if not self.G.is_graph_drawable(self.selected_layout_real):
+            self.set_default_layout()
+            return self.get_layout_error(layout)
+
     def handle_edges_submit(self, new_edges: dict):
         predecessor = self.predecessor
         successor = self.successor
-        try:
-            most_likely_time = float(new_edges.get("most_likely_time"))
-            optimistic_time = float(new_edges.get("optimistic_time"))
-            pessimistic_time = float(new_edges.get("pessimistic_time"))
-        except ValueError:
-            most_likely_time = 0
-            optimistic_time = 0
-            pessimistic_time = 0
+        most_likely_time = float(new_edges.get("most_likely_time"))
+        optimistic_time = float(new_edges.get("optimistic_time"))
+        pessimistic_time = float(new_edges.get("pessimistic_time"))
         if predecessor == "" or successor == "" or not most_likely_time or not optimistic_time or not pessimistic_time:
             return rx.window_alert(self.translations["alert_edge_submit"][self.language])
 
-        self.set_default_layout()
+        layout = self.selected_layout_real
+        if not self.G.is_edge_addable(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time, layout):
+            self.set_default_layout()
+            self.G.add_edge(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time)
+            self.predecessor = ""
+            self.successor = ""
+            return self.get_layout_error(layout)
         self.G.add_edge(predecessor, successor, most_likely_time, optimistic_time, pessimistic_time)
         self.predecessor = ""
         self.successor = ""
@@ -216,8 +239,11 @@ class pert_aoa_site(rx.State):
             return rx.window_alert(self.translations["alert_node_addition_character"][self.language])
         if not node_name:
             return rx.window_alert(self.translations["alert_node_addition_no_name"][self.language])
-
-        self.set_default_layout()
+        layout = self.selected_layout_real
+        if not self.G.is_node_addable(task_name=node_name, layout=layout):
+            self.set_default_layout()
+            self.G.add_node(node_name)
+            return self.get_layout_error(layout)
         self.G.add_node(node_name)
 
     def handle_node_deletion(self, node: dict):
@@ -226,8 +252,12 @@ class pert_aoa_site(rx.State):
             return rx.window_alert(self.translations["alert_node_delete_no_name"][self.language])
         if len(self.G.get_nodes_list()) == 1:
             return rx.window_alert(self.translations["alert_node_delete_no_nodes"][self.language])
-
-        self.set_default_layout()
+        layout = self.selected_layout_real
+        if not self.G.is_node_deletable(task_name=node_to_del, layout=layout):
+            self.set_default_layout()
+            self.G.remove_node(node_to_del)
+            self.node_to_delete = ""
+            return self.get_layout_error(layout)
         self.G.remove_node(node_to_del)
         self.node_to_delete = ""
 
@@ -235,55 +265,61 @@ class pert_aoa_site(rx.State):
         edge_to_del = str(edge.get("edge_del")).split("->")
         if self.edge_to_delete == "":
             return rx.window_alert(self.translations["alert_edge_delete_no_edge"][self.language])
-
-        self.set_default_layout()
+        layout = self.selected_layout_real
+        if not self.G.is_edge_deletable(edge_to_del[0], edge_to_del[1], layout=layout):
+            self.set_default_layout()
+            self.G.remove_edge(edge_to_del[0], edge_to_del[1])
+            self.edge_to_delete = ""
+            return self.get_layout_error(layout)
         self.G.remove_edge(edge_to_del[0], edge_to_del[1])
         self.edge_to_delete = ""
 
     @rx.var
     def pert_dataframe(self) -> pd.DataFrame:
         df = self.G.get_pd_dataframe()
-        try:
-            df.rename(columns={
-                'index': self.translations["df_node_name"][self.language],
-                'early_start': self.translations["df_node_early_start"][self.language],
-                'late_start': self.translations["df_node_late_start"][self.language],
-                'slack_time': self.translations["df_node_slack_time"][self.language]
-            }, inplace=True)
-            return df[[
-                self.translations["df_node_name"][self.language],
-                self.translations["df_node_early_start"][self.language],
-                self.translations["df_node_late_start"][self.language],
-                self.translations["df_node_slack_time"][self.language]
-            ]]
-        except KeyError:
-            return pd.DataFrame()
+        df.rename(columns={
+            'index': self.translations["df_node_name"][self.language],
+            'early_start': self.translations["df_node_early_start"][self.language],
+            'late_start': self.translations["df_node_late_start"][self.language],
+            'slack_time': self.translations["df_node_slack_time"][self.language]
+        }, inplace=True)
+        return df[[
+            self.translations["df_node_name"][self.language],
+            self.translations["df_node_early_start"][self.language],
+            self.translations["df_node_late_start"][self.language],
+            self.translations["df_node_slack_time"][self.language]
+        ]]
 
     async def handle_upload(self, files: list[rx.UploadFile]):
         H: PERT_graph = PERT_graph()
         H.reset_graph()
         H.remove_node("0")
-        for file in files:
-            upload_data = await file.read()
-            csvfile = upload_data.decode('utf-8').splitlines()
-            reader = csv.DictReader(csvfile)
-            if any(x not in reader.fieldnames for x in ['predecessor', 'successor', 'most_likely_time',
-                                                        'optimistic_time', 'pessimistic_time']):
-                return rx.window_alert(self.translations["alert_missing_fields"][self.language])
-            try:
-                for row in reader:
-                    H.add_edge(str(row["predecessor"]), str(row["successor"]), float(row["most_likely_time"]),
-                               float(row["optimistic_time"]), float(row["pessimistic_time"]))
-            except KeyError:
-                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
-            except TypeError as e:
-                return rx.window_alert(self.translations["alert_graph_upload"][self.language])
-            except ValueError as e:
-                return rx.window_alert(self.translations["alert_graph_upload_float"][self.language] + '\n' + str(e))
-            if H.is_directed_acyclic_graph():
-                self.G = H
-            else:
-                return rx.window_alert(self.translations["alert_not_DAG"][self.language])
+        file = files[0]
+        upload_data = await file.read()
+        file = upload_data.decode('utf-8')
+        csvfile = StringIO(file)
+        df = pd.read_csv(csvfile)
+        required_columns = {
+            'predecessor': ['object', 'str', 'int64', 'float64'],
+            'successor': ['object', 'str', 'int64', 'float64'],
+            'most_likely_time': ['int64', 'float64'],
+            'optimistic_time': ['int64', 'float64'],
+            'pessimistic_time': ['int64', 'float64']
+        }
+        # Check if all required columns exist
+        if not all(column in df.columns for column in required_columns):
+            return rx.window_alert(self.translations["alert_missing_fields"][self.language])
+        # Check data types
+        for column, dtype in required_columns.items():
+            if df[column].dtype not in dtype:
+                return rx.window_alert(self.translations["alert_graph_upload_float"][self.language] + f'{column}')
+        for index, row in df.iterrows():
+            H.add_edge(str(row["predecessor"]), str(row["successor"]), float(row["most_likely_time"]),
+                       float(row["optimistic_time"]), float(row["pessimistic_time"]))
+        if H.is_directed_acyclic_graph():
+            self.G = H
+        else:
+            return rx.window_alert(self.translations["alert_not_DAG"][self.language])
 
     @staticmethod
     def cancel_upload():
@@ -291,6 +327,8 @@ class pert_aoa_site(rx.State):
 
     @rx.var
     def cmp_image(self) -> Image:
+        if not self.G.is_graph_drawable(self.selected_layout_real):
+            self.set_default_layout()
         return self.G.export_graph_img(self.selected_layout_real)
 
     def download_graph(self):
@@ -302,20 +340,9 @@ class pert_aoa_site(rx.State):
         self.G.reset_graph()
 
     def handle_layout_select(self, form_data: dict):
-        selected_layout = str(form_data["selected_layout"])
-        try:
-            self.G.export_graph_img(selected_layout)
-            self.selected_layout = selected_layout
-            self.selected_layout_real = selected_layout
-        except:
-            match selected_layout:
-                case "planar":
-                    return rx.window_alert(self.translations["alert_planar_graph"][self.language])
-                case "graphviz":
-                    return rx.window_alert(self.translations["alert_graphviz"][self.language])
-                case "bfs_layout":
-                    return rx.window_alert(self.translations["alert_bfs"][self.language])
-            return rx.window_alert(self.translations["alert_something_wrong"][self.language])
+        selected_layout = str(form_data['selected_layout'])
+        self.selected_layout_real = selected_layout
+        return self.check_layout_error(selected_layout)
 
 
 @template(route="/pert_AoA", title="PERT AoA", image="/github.svg")
@@ -331,7 +358,7 @@ def graph():
                     rx.vstack(
                         rx.hstack(
                             rx.select(
-                                ["layer", "planar", "graphviz", "bfs_layout", "random"],  #
+                                ["layer", "random"],  #, "planar", "bfs_layout"
                                 default_value="layer",
                                 value=pert_aoa_site.selected_layout,
                                 on_change=pert_aoa_site.set_selected_layout,
@@ -414,13 +441,16 @@ def graph():
                             ),
                             rx.input(
                                 placeholder=pert_aoa_site.translations["edge_addition_time_placeholder"][
-                                    pert_aoa_site.language], size="1", name="most_likely_time"),
+                                    pert_aoa_site.language], size="1", name="most_likely_time", type="number",
+                                step="any", min=0),
                             rx.input(
                                 placeholder=pert_aoa_site.translations["edge_addition_optimistic_time_placeholder"][
-                                    pert_aoa_site.language], size="1", name="optimistic_time"),
+                                    pert_aoa_site.language], size="1", name="optimistic_time", type="number",
+                                step="any", min=0),
                             rx.input(
                                 placeholder=pert_aoa_site.translations["edge_addition_pessimistic_time_placeholder"][
-                                    pert_aoa_site.language], size="1", name="pessimistic_time"),
+                                    pert_aoa_site.language], size="1", name="pessimistic_time", type="number",
+                                step="any", min=0),
                             rx.button(
                                 pert_aoa_site.translations["submit"][pert_aoa_site.language], type="submit", size='1')
                         ),
